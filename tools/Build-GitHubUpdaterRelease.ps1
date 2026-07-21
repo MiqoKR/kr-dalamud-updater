@@ -16,6 +16,7 @@ $bootstrapSource = Join-Path $workspace 'launcher\KrDalamudUpdaterBootstrap\Prog
 $bootstrapCompiler = 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 $launcherIcon = Join-Path $workspace 'assets\launcher-icon\launcher-icon.ico'
 $readme = Join-Path $workspace 'launcher\KrDalamudUpdaterBootstrap\README-KR.txt'
+$licensesRoot = Join-Path $workspace 'licenses'
 $stageRoot = Join-Path $workspace 'artifacts\github-release\payload'
 $bootstrapRoot = Join-Path $workspace 'artifacts\github-release\bootstrap'
 $releaseRoot = Join-Path $workspace 'dist\github-release'
@@ -71,6 +72,10 @@ Copy-Item -LiteralPath $publishedExe -Destination (Join-Path $stageRoot 'Dalamud
 Remove-Item -LiteralPath $publishedExe -Force
 Remove-Item -LiteralPath (Join-Path $stageRoot 'DalamudUpdaterConfig.json') -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath (Join-Path $stageRoot 'KrDalamudUpdaterGui.pdb') -Force -ErrorAction SilentlyContinue
+
+$publishedLicensesRoot = Join-Path $stageRoot 'licenses'
+New-Item -ItemType Directory -Path $publishedLicensesRoot -Force | Out-Null
+Copy-Item -Path (Join-Path $licensesRoot '*') -Destination $publishedLicensesRoot -Recurse -Force
 
 Compress-Archive -Path (Join-Path $stageRoot '*') -DestinationPath $payloadZip -CompressionLevel Optimal
 

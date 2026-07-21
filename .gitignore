@@ -8,6 +8,8 @@
 !README.md
 !docs/
 !docs/**
+!licenses/
+!licenses/**
 !.github/
 !.github/workflows/
 !.github/workflows/release-updater.yml

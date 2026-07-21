@@ -1,4 +1,4 @@
-KR Dalamud Updater 0.4.0
+KR Dalamud Updater 0.4.1
 
 사용 방법
 1. 배포 ZIP 전체를 쓰기 가능한 일반 폴더에 압축 해제합니다.
