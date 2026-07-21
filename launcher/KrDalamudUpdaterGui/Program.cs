@@ -286,9 +286,9 @@ internal sealed class UpdaterForm : Form
         Controls.Add(applyButton);
 
         updaterVersionLabel.SetBounds(14, 352, 132, 18);
-        updaterVersionLabel.Text = "업데이터 버전 : 0.3.5.0";
+        var updaterVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "확인 불가";
+        updaterVersionLabel.Text = $"업데이터 버전 : {updaterVersion}";
         Controls.Add(updaterVersionLabel);
-        updaterVersionLabel.Text = "업데이터 버전 : 0.3.6.0";
 
         discordLink.SetBounds(188, 352, 48, 18);
         discordLink.Text = "디스코드";
