@@ -1,0 +1,6 @@
+{
+  "Enabled": false,
+  "Repository": "YOUR-GITHUB-ID/kr-dalamud-updater",
+  "AssetName": "KR-Dalamud-Updater-Payload.zip",
+  "TimeoutSeconds": 20
+}

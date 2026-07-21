@@ -1,0 +1,66 @@
+# This repository uses an allow-list because the workspace also contains local
+# game files, backups, crash dumps, downloaded third-party code, and experiments.
+*
+
+# Repository metadata and documentation
+!.gitignore
+!.gitattributes
+!README.md
+!docs/
+!docs/**
+!.github/
+!.github/workflows/
+!.github/workflows/release-updater.yml
+
+# Updater source
+!launcher/
+launcher/*
+!launcher/KrDalamudUpdaterGui/
+launcher/KrDalamudUpdaterGui/*
+!launcher/KrDalamudUpdaterGui/*.cs
+!launcher/KrDalamudUpdaterGui/*.csproj
+!launcher/KrDalamudUpdaterGui/DalamudUpdaterConfig.json
+!launcher/KrDalamudUpdaterGui/Compatibility/
+!launcher/KrDalamudUpdaterGui/Compatibility/**/
+!launcher/KrDalamudUpdaterGui/Compatibility/**/*.gz
+
+!launcher/KrDalamudUpdaterBootstrap/
+launcher/KrDalamudUpdaterBootstrap/*
+!launcher/KrDalamudUpdaterBootstrap/Program.cs
+!launcher/KrDalamudUpdaterBootstrap/README-KR.txt
+!launcher/KrDalamudUpdaterBootstrap/UpdaterReleaseConfig.example.json
+
+# Release build scripts
+!tools/
+tools/*
+!tools/Build-GitHubUpdaterRelease.ps1
+!tools/Build-KrDalamudPortablePackage.ps1
+
+# Application icon
+!assets/
+assets/*
+!assets/launcher-icon/
+!assets/launcher-icon/**
+
+# Never commit generated or user-specific files even if a parent is allowed later
+**/bin/
+**/obj/
+**/*.user
+**/*.suo
+**/*.log
+**/*.dmp
+**/*.tmp
+**/*.new
+**/*.bak
+**/UpdaterReleaseConfig.json
+launcher/KrDalamudUpdaterBootstrap/Payload/
+artifacts/
+dist/
+.agents/
+.codex/
+.vs/
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
