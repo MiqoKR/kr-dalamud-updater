@@ -1,12 +1,17 @@
-KR Dalamud Updater 0.4.1
+KR Dalamud Updater 0.4.2
+
+필수 설치
+- Microsoft .NET 10 Desktop Runtime x64
+- 다운로드: https://dotnet.microsoft.com/download/dotnet/10.0
 
 사용 방법
 1. 배포 ZIP 전체를 쓰기 가능한 일반 폴더에 압축 해제합니다.
 2. 게임과 기존 Dalamud Updater를 종료합니다.
 3. Dalamud.Updater.exe를 실행합니다.
-4. 실행기는 GitHub의 최신 정식 Release를 확인하고 SHA-256 검증 후 설치합니다.
-5. GitHub에 연결할 수 없으면 마지막 정상 버전 또는 내장 버전으로 실행합니다.
-6. 최신 공식 Dalamud가 필요하면 게임을 종료한 상태에서 Check Update를 누릅니다.
+4. .NET 10 Desktop Runtime이 없으면 표시되는 안내에 따라 먼저 설치합니다.
+5. 실행기는 GitHub의 최신 정식 Release를 확인하고 SHA-256 검증 후 설치합니다.
+6. GitHub에 연결할 수 없으면 마지막 정상 버전 또는 내장 버전으로 실행합니다.
+7. 최신 공식 Dalamud가 필요하면 게임을 종료한 상태에서 Check Update를 누릅니다.
 
 주의
 - UpdaterReleaseConfig.json을 Dalamud.Updater.exe 옆에 보관해야 자동 업데이트가 작동합니다.

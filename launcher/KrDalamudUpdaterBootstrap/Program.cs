@@ -13,8 +13,8 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("KR Dalamud Updater Bootstrap")]
 [assembly: AssemblyDescription("Downloads, verifies, and starts the KR Dalamud Updater")]
-[assembly: AssemblyVersion("0.4.1.0")]
-[assembly: AssemblyFileVersion("0.4.1.0")]
+[assembly: AssemblyVersion("0.4.2.0")]
+[assembly: AssemblyFileVersion("0.4.2.0")]
 
 namespace KrDalamudUpdaterBootstrap
 {
@@ -25,7 +25,8 @@ namespace KrDalamudUpdaterBootstrap
         private const string PortableConfigFileName = "DalamudUpdaterConfig.json";
         private const string ReleaseConfigFileName = "UpdaterReleaseConfig.json";
         private const string SharedSettingsEnvironmentName = "KR_DALAMUD_SETTINGS_PATH";
-        private const string BootstrapVersion = "0.4.1";
+        private const string BootstrapVersion = "0.4.2";
+        private const string DesktopRuntimeDownloadUrl = "https://dotnet.microsoft.com/download/dotnet/10.0";
         private const long MaximumAssetBytes = 500L * 1024L * 1024L;
 
         [STAThread]
@@ -71,6 +72,12 @@ namespace KrDalamudUpdaterBootstrap
                 if (ContainsArgument(args, "--extract-only"))
                 {
                     return 0;
+                }
+
+                if (!HasNet10DesktopRuntime())
+                {
+                    ShowDesktopRuntimeRequired();
+                    return 2;
                 }
 
                 StartGui(launchRoot, sharedSettingsPath, args);
@@ -428,6 +435,71 @@ namespace KrDalamudUpdaterBootstrap
             startInfo.Arguments = BuildArguments(args);
             startInfo.EnvironmentVariables[SharedSettingsEnvironmentName] = sharedSettingsPath;
             Process.Start(startInfo);
+        }
+
+        private static bool HasNet10DesktopRuntime()
+        {
+            string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            if (string.IsNullOrWhiteSpace(programFiles))
+            {
+                return false;
+            }
+
+            string runtimeRoot = Path.Combine(programFiles, "dotnet", "shared", "Microsoft.WindowsDesktop.App");
+            if (!Directory.Exists(runtimeRoot))
+            {
+                return false;
+            }
+
+            try
+            {
+                foreach (string directory in Directory.GetDirectories(runtimeRoot))
+                {
+                    Version version;
+                    if (Version.TryParse(Path.GetFileName(directory), out version) && version.Major == 10)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return false;
+        }
+
+        private static void ShowDesktopRuntimeRequired()
+        {
+            DialogResult result = MessageBox.Show(
+                "이 실행기에는 Microsoft .NET 10 Desktop Runtime (x64)이 필요합니다.\r\n\r\n" +
+                "먼저 런타임을 설치한 다음 실행기를 다시 시작하세요.\r\n\r\n" +
+                "Microsoft 다운로드 페이지를 여시겠습니까?",
+                "KR Dalamud Updater",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information);
+
+            if (result != DialogResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.FileName = DesktopRuntimeDownloadUrl;
+                startInfo.UseShellExecute = true;
+                Process.Start(startInfo);
+            }
+            catch
+            {
+                MessageBox.Show(
+                    DesktopRuntimeDownloadUrl,
+                    ".NET 10 Desktop Runtime 다운로드",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
         }
 
         private static string MakeSafeFolderName(string value)

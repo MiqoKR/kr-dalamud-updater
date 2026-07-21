@@ -41,7 +41,7 @@ GitHub Release가 완료될 때까지 업데이터는 해당 버전을 받지 �
 
 ## 4. 사용자 배포
 
-신규 사용자에게는 Portable ZIP만 전달합니다. 사용자는 ZIP을 일반 폴더에 풀고 `Dalamud.Updater.exe`를 실행합니다. 이후 버전부터는 실행기가 GitHub 최신 Release를 확인합니다.
+신규 사용자에게는 Portable ZIP과 Microsoft .NET 10 Desktop Runtime x64 설치 안내를 함께 전달합니다. 사용자는 런타임을 한 번 설치하고, ZIP을 일반 폴더에 풀어 `Dalamud.Updater.exe`를 실행합니다. 이후 버전부터는 실행기가 GitHub 최신 Release를 확인합니다.
 
 ## 5. 보안 원칙
 

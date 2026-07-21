@@ -11,6 +11,13 @@
 5. 다운로드한 ZIP의 GitHub SHA-256 digest를 확인한 후 버전별 폴더에 설치합니다.
 6. 네트워크 또는 업데이트 오류가 발생하면 마지막 정상 버전이나 내장 버전으로 실행합니다.
 
+## 사용자 요구 사항
+
+- Windows x64
+- Microsoft .NET 10 Desktop Runtime x64
+
+배포 파일에는 .NET 런타임을 포함하지 않습니다. 런타임이 없으면 부트스트랩이 Microsoft 다운로드 페이지를 안내합니다.
+
 ## 현재 상태
 
 - GitHub Release 기반 업데이트 부트스트랩

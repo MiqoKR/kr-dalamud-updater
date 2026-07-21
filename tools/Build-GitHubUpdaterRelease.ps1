@@ -52,9 +52,10 @@ if ($LASTEXITCODE -ne 0) {
 dotnet publish $guiProject `
     -c Release `
     -r win-x64 `
-    --self-contained true `
+    --self-contained false `
     --no-restore `
     -p:Version=$Version `
+    -p:SelfContained=false `
     -p:PublishSingleFile=false `
     -p:DebugType=None `
     -p:DebugSymbols=false `
