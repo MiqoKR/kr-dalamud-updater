@@ -1,4 +1,4 @@
-KR Dalamud Updater 0.4.3
+KR Dalamud Updater 0.4.4
 
 필수 설치
 - Microsoft .NET 10 Desktop Runtime x64

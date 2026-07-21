@@ -167,38 +167,148 @@ internal sealed class UpdaterForm : Form
 
     private void BuildUi()
     {
-        Text = "달라무드 업데이터";
-        ClientSize = new Size(250, 396);
+        var accentColor = Color.FromArgb(25, 128, 104);
+        var accentHoverColor = Color.FromArgb(20, 109, 88);
+        var headerColor = Color.FromArgb(43, 47, 54);
+        var surfaceColor = Color.White;
+        var canvasColor = Color.FromArgb(245, 246, 248);
+        var primaryTextColor = Color.FromArgb(36, 39, 44);
+        var secondaryTextColor = Color.FromArgb(103, 109, 118);
+        var borderColor = Color.FromArgb(218, 222, 228);
+        var updaterVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "확인 불가";
+
+        Text = "KR Dalamud Updater";
+        ClientSize = new Size(460, 590);
+        MinimumSize = new Size(476, 629);
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         MinimizeBox = true;
         StartPosition = FormStartPosition.CenterScreen;
+        Font = new Font("Segoe UI", 9F);
+        BackColor = canvasColor;
         Icon = trayIcon;
 
-        dalamudVersionLabel.SetBounds(14, 16, 215, 22);
-        dalamudVersionLabel.Text = $"달라무드 버전 : {settings.HookVersion}";
-        Controls.Add(dalamudVersionLabel);
+        var header = new Panel
+        {
+            BackColor = headerColor,
+            Dock = DockStyle.Top,
+            Height = 88,
+        };
+        var titleLabel = new Label
+        {
+            Text = "KR Dalamud Updater",
+            ForeColor = Color.White,
+            Font = new Font("Segoe UI Semibold", 16F),
+            Location = new Point(20, 14),
+            AutoSize = true,
+        };
+        var subtitleLabel = new Label
+        {
+            Text = "한국 서버용 Dalamud 실행 및 호환성 관리",
+            ForeColor = Color.FromArgb(193, 199, 207),
+            Font = new Font("Segoe UI", 9F),
+            Location = new Point(22, 51),
+            AutoSize = true,
+        };
+        var versionBadge = new Panel
+        {
+            BackColor = Color.FromArgb(61, 66, 74),
+            Location = new Point(344, 25),
+            Size = new Size(92, 31),
+        };
+        var versionBadgeLabel = new Label
+        {
+            Text = $"v{updaterVersion}",
+            ForeColor = Color.FromArgb(219, 224, 230),
+            Font = new Font("Segoe UI Semibold", 8.5F),
+            TextAlign = ContentAlignment.MiddleCenter,
+            Dock = DockStyle.Fill,
+        };
+        versionBadge.Controls.Add(versionBadgeLabel);
+        header.Controls.Add(titleLabel);
+        header.Controls.Add(subtitleLabel);
+        header.Controls.Add(versionBadge);
+        Controls.Add(header);
 
-        checkUpdateButton.SetBounds(14, 48, 222, 36);
-        checkUpdateButton.Text = "Check Update";
+        var versionCard = new Panel
+        {
+            BackColor = surfaceColor,
+            BorderStyle = BorderStyle.FixedSingle,
+            Location = new Point(18, 106),
+            Size = new Size(424, 126),
+        };
+        var versionSectionLabel = new Label
+        {
+            Text = "DALAMUD CORE",
+            ForeColor = secondaryTextColor,
+            Font = new Font("Segoe UI Semibold", 8F),
+            Location = new Point(15, 11),
+            AutoSize = true,
+        };
+        dalamudVersionLabel.SetBounds(15, 32, 390, 28);
+        dalamudVersionLabel.Text = $"설치 버전  {settings.HookVersion}";
+        dalamudVersionLabel.ForeColor = primaryTextColor;
+        dalamudVersionLabel.Font = new Font("Segoe UI Semibold", 13F);
+        versionCard.Controls.Add(versionSectionLabel);
+        versionCard.Controls.Add(dalamudVersionLabel);
+
+        checkUpdateButton.SetBounds(224, 65, 180, 34);
+        checkUpdateButton.Text = "업데이트 확인";
+        checkUpdateButton.BackColor = surfaceColor;
+        checkUpdateButton.ForeColor = accentColor;
+        checkUpdateButton.Font = new Font("Segoe UI Semibold", 9F);
+        checkUpdateButton.FlatStyle = FlatStyle.Flat;
+        checkUpdateButton.FlatAppearance.BorderColor = accentColor;
+        checkUpdateButton.FlatAppearance.BorderSize = 1;
+        checkUpdateButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(235, 247, 243);
         checkUpdateButton.Click += async (_, _) => await CheckUpdateAsync();
-        Controls.Add(checkUpdateButton);
+        versionCard.Controls.Add(checkUpdateButton);
 
-        hookCombo.SetBounds(14, 92, 222, 24);
+        hookCombo.SetBounds(15, 66, 199, 30);
         hookCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+        hookCombo.FlatStyle = FlatStyle.Flat;
+        hookCombo.Font = new Font("Segoe UI", 9.5F);
         hookCombo.SelectedIndexChanged += (_, _) =>
         {
             if (hookCombo.SelectedItem is string selected && !string.IsNullOrWhiteSpace(selected))
             {
                 settings.HookVersion = selected;
-                dalamudVersionLabel.Text = $"달라무드 버전 : {settings.HookVersion}";
+                dalamudVersionLabel.Text = $"설치 버전  {settings.HookVersion}";
                 settings.Save();
             }
         };
-        Controls.Add(hookCombo);
+        versionCard.Controls.Add(hookCombo);
+        var versionHintLabel = new Label
+        {
+            Text = "공식 Stable 패키지 · KR 호환성 검증",
+            ForeColor = secondaryTextColor,
+            Location = new Point(16, 101),
+            Size = new Size(388, 18),
+        };
+        versionCard.Controls.Add(versionHintLabel);
+        Controls.Add(versionCard);
 
-        autoStartCheck.SetBounds(14, 125, 100, 24);
+        var settingsCard = new Panel
+        {
+            BackColor = surfaceColor,
+            BorderStyle = BorderStyle.FixedSingle,
+            Location = new Point(18, 246),
+            Size = new Size(424, 166),
+        };
+        var settingsSectionLabel = new Label
+        {
+            Text = "실행 설정",
+            ForeColor = primaryTextColor,
+            Font = new Font("Segoe UI Semibold", 10F),
+            Location = new Point(15, 12),
+            AutoSize = true,
+        };
+        settingsCard.Controls.Add(settingsSectionLabel);
+
+        autoStartCheck.SetBounds(15, 42, 175, 24);
         autoStartCheck.Text = "자동 시작";
+        autoStartCheck.FlatStyle = FlatStyle.Flat;
+        autoStartCheck.ForeColor = primaryTextColor;
         autoStartCheck.CheckedChanged += (_, _) =>
         {
             settings.AutoStart = autoStartCheck.Checked;
@@ -216,44 +326,59 @@ internal sealed class UpdaterForm : Form
 
             settings.Save();
         };
-        Controls.Add(autoStartCheck);
+        settingsCard.Controls.Add(autoStartCheck);
 
-        autoApplyCheck.SetBounds(136, 125, 100, 24);
+        autoApplyCheck.SetBounds(218, 42, 175, 24);
         autoApplyCheck.Text = "자동 적용";
+        autoApplyCheck.FlatStyle = FlatStyle.Flat;
+        autoApplyCheck.ForeColor = primaryTextColor;
         autoApplyCheck.CheckedChanged += (_, _) =>
         {
             settings.AutoApply = autoApplyCheck.Checked;
             settings.Save();
         };
-        Controls.Add(autoApplyCheck);
+        settingsCard.Controls.Add(autoApplyCheck);
 
-        disablePluginsCheck.SetBounds(14, 153, 210, 24);
+        disablePluginsCheck.SetBounds(15, 70, 175, 24);
         disablePluginsCheck.Text = "모드 플러그인 비활성화";
+        disablePluginsCheck.FlatStyle = FlatStyle.Flat;
+        disablePluginsCheck.ForeColor = primaryTextColor;
         disablePluginsCheck.CheckedChanged += (_, _) =>
         {
             settings.DisablePlugins = disablePluginsCheck.Checked;
             settings.Save();
         };
-        Controls.Add(disablePluginsCheck);
+        settingsCard.Controls.Add(disablePluginsCheck);
 
-        disableCustomRepoCheck.SetBounds(14, 181, 210, 24);
+        disableCustomRepoCheck.SetBounds(218, 70, 175, 24);
         disableCustomRepoCheck.Text = "커스텀 리포 비활성화";
+        disableCustomRepoCheck.FlatStyle = FlatStyle.Flat;
+        disableCustomRepoCheck.ForeColor = primaryTextColor;
         disableCustomRepoCheck.CheckedChanged += (_, _) =>
         {
             settings.DisableCustomRepoPlugins = disableCustomRepoCheck.Checked;
             settings.Save();
         };
-        Controls.Add(disableCustomRepoCheck);
+        settingsCard.Controls.Add(disableCustomRepoCheck);
+
+        var divider = new Panel
+        {
+            BackColor = borderColor,
+            Location = new Point(15, 103),
+            Size = new Size(389, 1),
+        };
+        settingsCard.Controls.Add(divider);
 
         var delayLabel = new Label
         {
-            Text = "딜레이",
-            Location = new Point(14, 215),
-            Size = new Size(55, 24),
+            Text = "적용 딜레이",
+            ForeColor = primaryTextColor,
+            Location = new Point(15, 116),
+            Size = new Size(72, 24),
         };
-        Controls.Add(delayLabel);
+        settingsCard.Controls.Add(delayLabel);
 
-        delayInput.SetBounds(152, 212, 58, 24);
+        delayInput.SetBounds(91, 112, 58, 26);
         delayInput.Minimum = 0;
         delayInput.Maximum = 30;
         delayInput.ValueChanged += (_, _) =>
@@ -261,47 +386,72 @@ internal sealed class UpdaterForm : Form
             settings.DelaySeconds = (int)delayInput.Value;
             settings.Save();
         };
-        Controls.Add(delayInput);
+        settingsCard.Controls.Add(delayInput);
 
         var secondsLabel = new Label
         {
             Text = "초",
-            Location = new Point(215, 215),
+            ForeColor = primaryTextColor,
+            Location = new Point(155, 116),
             Size = new Size(22, 24),
         };
-        Controls.Add(secondsLabel);
+        settingsCard.Controls.Add(secondsLabel);
 
         var warningLabel = new Label
         {
-            Text = "검은화면이 계속 되면 딜레이를 늘리세요.",
-            ForeColor = Color.Red,
-            Location = new Point(14, 244),
-            Size = new Size(222, 22),
+            Text = "검은 화면이 지속되면 딜레이를 늘려주세요.",
+            ForeColor = Color.FromArgb(190, 67, 67),
+            Location = new Point(15, 143),
+            Size = new Size(389, 18),
         };
-        Controls.Add(warningLabel);
+        settingsCard.Controls.Add(warningLabel);
+        Controls.Add(settingsCard);
 
-        applyButton.SetBounds(14, 271, 222, 75);
+        applyButton.SetBounds(18, 430, 424, 58);
         applyButton.Text = "달라무드 적용";
+        applyButton.BackColor = accentColor;
+        applyButton.ForeColor = Color.White;
+        applyButton.Font = new Font("Segoe UI Semibold", 11F);
+        applyButton.FlatStyle = FlatStyle.Flat;
+        applyButton.FlatAppearance.BorderSize = 0;
+        applyButton.FlatAppearance.MouseOverBackColor = accentHoverColor;
+        applyButton.Cursor = Cursors.Hand;
         applyButton.Click += async (_, _) => await ApplyDalamudAsync(manual: true, cleanOverride: null);
         Controls.Add(applyButton);
 
-        updaterVersionLabel.SetBounds(14, 352, 132, 18);
-        var updaterVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "확인 불가";
-        updaterVersionLabel.Text = $"업데이터 버전 : {updaterVersion}";
-        Controls.Add(updaterVersionLabel);
-
-        discordLink.SetBounds(188, 352, 48, 18);
-        discordLink.Text = "디스코드";
-        discordLink.LinkClicked += (_, _) => OpenUrl("https://discord.com");
-        Controls.Add(discordLink);
-
-        progressBar.SetBounds(14, 374, 90, 18);
-        progressBar.Visible = false;
-        Controls.Add(progressBar);
-
-        statusLabel.SetBounds(110, 374, 126, 18);
+        var footerCard = new Panel
+        {
+            BackColor = surfaceColor,
+            BorderStyle = BorderStyle.FixedSingle,
+            Location = new Point(18, 506),
+            Size = new Size(424, 68),
+        };
+        statusLabel.SetBounds(14, 9, 394, 22);
+        statusLabel.ForeColor = secondaryTextColor;
+        statusLabel.AutoEllipsis = true;
         statusLabel.Text = "";
-        Controls.Add(statusLabel);
+        footerCard.Controls.Add(statusLabel);
+
+        updaterVersionLabel.SetBounds(14, 38, 190, 18);
+        updaterVersionLabel.Text = $"업데이터 버전 : {updaterVersion}";
+        updaterVersionLabel.ForeColor = secondaryTextColor;
+        footerCard.Controls.Add(updaterVersionLabel);
+
+        discordLink.SetBounds(289, 38, 119, 18);
+        discordLink.Text = "Discord 커뮤니티";
+        discordLink.TextAlign = ContentAlignment.MiddleRight;
+        discordLink.LinkColor = accentColor;
+        discordLink.ActiveLinkColor = accentHoverColor;
+        discordLink.VisitedLinkColor = accentColor;
+        discordLink.LinkBehavior = LinkBehavior.HoverUnderline;
+        discordLink.Cursor = Cursors.Hand;
+        discordLink.LinkClicked += (_, _) => OpenUrl("https://discord.gg/Me3sJ2CXp");
+        footerCard.Controls.Add(discordLink);
+
+        progressBar.SetBounds(0, 62, 422, 5);
+        progressBar.Visible = false;
+        footerCard.Controls.Add(progressBar);
+        Controls.Add(footerCard);
     }
 
     private void BuildTray()
@@ -529,7 +679,7 @@ internal sealed class UpdaterForm : Form
         settings.Save();
         LoadHookVersions();
         hookCombo.SelectedItem = version;
-        dalamudVersionLabel.Text = $"달라무드 버전 : {version}";
+        dalamudVersionLabel.Text = $"설치 버전  {version}";
     }
 
     private static DalamudReleaseInfo? TryLoadReleaseInfo(string path)
