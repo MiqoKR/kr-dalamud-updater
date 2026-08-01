@@ -28,6 +28,39 @@ internal static class Program
             }
         }
 
+        if (args.Length == 2 && args[0].Equals("--patch-login-state", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                DalamudKrSignaturePatch.Apply(args[1]);
+                Console.WriteLine("Dalamud KR login-state patch applied and verified.");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                return 1;
+            }
+        }
+
+        if (args.Length == 2 && args[0].Equals("--protect-simpleheels", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var layout = DalamudLayout.FromSettings(new UpdaterSettings { ProfileRoot = args[1] });
+                var protectedPlugin = SimpleHeelsStabilityGuard.Protect(layout);
+                Console.WriteLine(protectedPlugin
+                    ? "Simple Heels 0.11.1.7 KR stability protection verified."
+                    : "Simple Heels 0.11.1.7 is not installed; nothing changed.");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                return 1;
+            }
+        }
+
         if (OperatingSystem.IsWindows() &&
             !args.Contains("--no-elevate", StringComparer.OrdinalIgnoreCase) &&
             !IsAdministrator())
@@ -112,7 +145,7 @@ internal sealed class UpdaterForm : Form
     private readonly NumericUpDown delayInput = new();
     private readonly Button applyButton = new();
     private readonly Label updaterVersionLabel = new();
-    private readonly LinkLabel discordLink = new();
+    private readonly LinkLabel githubLink = new();
     private readonly ProgressBar progressBar = new();
     private readonly Label statusLabel = new();
 
@@ -132,6 +165,7 @@ internal sealed class UpdaterForm : Form
         BuildTray();
         LoadHookVersions();
         ApplySettingsToUi();
+        EnsureInstalledHookCompatibility();
 
         monitorTimer.Interval = 1000;
         monitorTimer.Tick += (_, _) => MonitorTick();
@@ -437,16 +471,16 @@ internal sealed class UpdaterForm : Form
         updaterVersionLabel.ForeColor = secondaryTextColor;
         footerCard.Controls.Add(updaterVersionLabel);
 
-        discordLink.SetBounds(289, 38, 119, 18);
-        discordLink.Text = "Discord 커뮤니티";
-        discordLink.TextAlign = ContentAlignment.MiddleRight;
-        discordLink.LinkColor = accentColor;
-        discordLink.ActiveLinkColor = accentHoverColor;
-        discordLink.VisitedLinkColor = accentColor;
-        discordLink.LinkBehavior = LinkBehavior.HoverUnderline;
-        discordLink.Cursor = Cursors.Hand;
-        discordLink.LinkClicked += (_, _) => OpenUrl("https://discord.gg/Me3sJ2CXp");
-        footerCard.Controls.Add(discordLink);
+        githubLink.SetBounds(289, 38, 119, 18);
+        githubLink.Text = "MiqoKR GitHub";
+        githubLink.TextAlign = ContentAlignment.MiddleRight;
+        githubLink.LinkColor = accentColor;
+        githubLink.ActiveLinkColor = accentHoverColor;
+        githubLink.VisitedLinkColor = accentColor;
+        githubLink.LinkBehavior = LinkBehavior.HoverUnderline;
+        githubLink.Cursor = Cursors.Hand;
+        githubLink.LinkClicked += (_, _) => OpenUrl("https://github.com/MiqoKR");
+        footerCard.Controls.Add(githubLink);
 
         progressBar.SetBounds(0, 62, 422, 5);
         progressBar.Visible = false;
@@ -520,6 +554,47 @@ internal sealed class UpdaterForm : Form
         hookCombo.SelectedItem = settings.HookVersion;
     }
 
+    // A Hook installed before this updater release can be missing the KR state
+    // fallback.  Repair it only while the game is stopped; loaded DLLs are never
+    // modified.  Verification is intentionally attempted first, so a healthy
+    // installation is only read, not rewritten.
+    private void EnsureInstalledHookCompatibility()
+    {
+        if (FindTarget() is not null)
+        {
+            return;
+        }
+
+        var hookRoot = Path.Combine(
+            ExpandPath(settings.ProfileRoot),
+            "addon",
+            "Hooks",
+            settings.HookVersion);
+        if (!File.Exists(Path.Combine(hookRoot, "Dalamud.dll")) ||
+            !File.Exists(Path.Combine(hookRoot, "version.json")))
+        {
+            return;
+        }
+
+        try
+        {
+            DalamudKrCompatibilityPatch.Verify(hookRoot);
+        }
+        catch
+        {
+            try
+            {
+                DalamudKrCompatibilityPatch.Apply(hookRoot);
+                DalamudKrCompatibilityPatch.Verify(hookRoot);
+            }
+            catch
+            {
+                // The normal launch path will show the detailed verification error.
+                // Do not block the updater tray process on an unsupported Hook.
+            }
+        }
+    }
+
     private void ResolveInstalledHookVersion()
     {
         var profileRoot = ExpandPath(settings.ProfileRoot);
@@ -591,14 +666,13 @@ internal sealed class UpdaterForm : Form
             }
 
             var profileRoot = ExpandPath(settings.ProfileRoot);
-            var current = TryLoadReleaseInfo(Path.Combine(profileRoot, "addon", "Hooks", settings.HookVersion, "version.json"));
-            if (current is not null &&
-                !string.IsNullOrWhiteSpace(current.SupportedGameVer) &&
-                !string.Equals(current.SupportedGameVer, release.SupportedGameVer, StringComparison.OrdinalIgnoreCase))
+            if (!DalamudKrCompatibilityPatch.SupportsGameVersion(release.SupportedGameVer))
             {
-                SetStatus("게임 버전 변경 감지");
+                SetStatus("지원하지 않는 게임 버전");
                 MessageBox.Show(
-                    $"공식 지원 게임 버전이 변경되었습니다.\n\n현재: {current.SupportedGameVer}\n공식: {release.SupportedGameVer}\n\n한섭 호환성을 먼저 확인해야 하므로 자동 업데이트를 중단합니다.",
+                    $"이 업데이터가 아직 검증하지 않은 게임 버전입니다.\n\n" +
+                    $"지원: {DalamudKrCompatibilityPatch.SupportedGameVersion}\n" +
+                    $"공식: {release.SupportedGameVer}\n\n업데이터 새 버전이 나올 때까지 설치하지 않습니다.",
                     "달라무드 업데이터",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -606,7 +680,7 @@ internal sealed class UpdaterForm : Form
             }
 
             var localRuntimeVersion = ReadTrimmed(Path.Combine(profileRoot, "runtime", "version"));
-            if (!string.Equals(localRuntimeVersion, release.RuntimeVersion, StringComparison.OrdinalIgnoreCase))
+            if (!IsCompatibleRuntimeVersion(localRuntimeVersion, release.RuntimeVersion))
             {
                 SetStatus("런타임 업데이트 필요");
                 MessageBox.Show(
@@ -706,6 +780,17 @@ internal sealed class UpdaterForm : Form
         {
             return null;
         }
+    }
+
+    internal static bool IsCompatibleRuntimeVersion(string? localVersion, string? requiredVersion)
+    {
+        if (!Version.TryParse(localVersion, out var local) ||
+            !Version.TryParse(requiredVersion, out var required))
+        {
+            return false;
+        }
+
+        return local.Major == required.Major && local >= required;
     }
 
     private static bool IsHookInstalled(string profileRoot, string version)
@@ -992,6 +1077,24 @@ internal sealed class UpdaterForm : Form
             return;
         }
 
+        try
+        {
+            if (SimpleHeelsStabilityGuard.Protect(layout))
+            {
+                SetStatus("Simple Heels 안정판 보호 확인");
+            }
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Simple Heels 안정화 필요");
+            MessageBox.Show(
+                $"{ex.Message}\n\nSimple Heels 파일을 복구한 뒤 다시 적용해 주세요.",
+                "달라무드 적용 중단",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return;
+        }
+
         applying = true;
         applyButton.Enabled = false;
         SetBusy(true, "Applying...");
@@ -1265,7 +1368,7 @@ internal sealed class DalamudAssetEntry
 internal sealed class UpdaterSettings
 {
     public string ProfileRoot { get; set; } = "%APPDATA%\\XIVLauncherKR";
-    public string HookVersion { get; set; } = "15.0.2.3";
+    public string HookVersion { get; set; } = "15.0.3.0";
     public bool AutoStart { get; set; } = true;
     public bool AutoApply { get; set; } = true;
     public bool DisablePlugins { get; set; }

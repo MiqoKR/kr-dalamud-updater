@@ -13,8 +13,8 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("KR Dalamud Updater Bootstrap")]
 [assembly: AssemblyDescription("Downloads, verifies, and starts the KR Dalamud Updater")]
-[assembly: AssemblyVersion("0.4.4.0")]
-[assembly: AssemblyFileVersion("0.4.4.0")]
+[assembly: AssemblyVersion("0.4.9.0")]
+[assembly: AssemblyFileVersion("0.4.9.0")]
 
 namespace KrDalamudUpdaterBootstrap
 {
@@ -25,7 +25,7 @@ namespace KrDalamudUpdaterBootstrap
         private const string PortableConfigFileName = "DalamudUpdaterConfig.json";
         private const string ReleaseConfigFileName = "UpdaterReleaseConfig.json";
         private const string SharedSettingsEnvironmentName = "KR_DALAMUD_SETTINGS_PATH";
-        private const string BootstrapVersion = "0.4.4";
+        private const string BootstrapVersion = "0.4.9";
         private const string DesktopRuntimeDownloadUrl = "https://dotnet.microsoft.com/download/dotnet/10.0";
         private const long MaximumAssetBytes = 500L * 1024L * 1024L;
 
@@ -46,8 +46,15 @@ namespace KrDalamudUpdaterBootstrap
 
                 string sharedSettingsPath = PrepareSharedSettings(executableRoot);
                 string launchRoot = null;
+                bool offline = ContainsArgument(args, "--offline");
 
-                if (!ContainsArgument(args, "--offline"))
+                if (offline)
+                {
+                    // Offline mode is also the recovery path. Always use this executable's
+                    // embedded payload instead of a previously selected GitHub version.
+                    launchRoot = InstallEmbeddedPayload(versionsRoot);
+                }
+                else
                 {
                     try
                     {
@@ -57,16 +64,16 @@ namespace KrDalamudUpdaterBootstrap
                     {
                         Log(applicationRoot, "GitHub update check failed; using a local version. " + updateError);
                     }
-                }
 
-                if (string.IsNullOrWhiteSpace(launchRoot))
-                {
-                    launchRoot = TryGetCurrentVersion(applicationRoot, versionsRoot);
-                }
+                    if (string.IsNullOrWhiteSpace(launchRoot))
+                    {
+                        launchRoot = TryGetCurrentVersion(applicationRoot, versionsRoot);
+                    }
 
-                if (string.IsNullOrWhiteSpace(launchRoot))
-                {
-                    launchRoot = InstallEmbeddedPayload(versionsRoot);
+                    if (string.IsNullOrWhiteSpace(launchRoot))
+                    {
+                        launchRoot = InstallEmbeddedPayload(versionsRoot);
+                    }
                 }
 
                 if (ContainsArgument(args, "--extract-only"))
