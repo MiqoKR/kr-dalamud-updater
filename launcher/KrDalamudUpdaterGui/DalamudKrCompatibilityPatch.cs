@@ -7,12 +7,12 @@ namespace KrDalamudUpdaterGui;
 
 internal static class DalamudKrCompatibilityPatch
 {
-    public const string SupportedGameVersion = "2026.07.16.0001.0000";
+    public const string SupportedGameVersion = "2026.08.05.0000.0000";
 
     private const string ClientStructsFileName = "FFXIVClientStructs.dll";
-    private const string OfficialClientStructsFileVersion = "7.51.0.8681";
+    private const string OfficialClientStructsFileVersion = "7.51.0.8798";
     private const string OfficialClientStructsSha256 =
-        "070AE575722317FBD8577623A77F36CF0530E3B82F75EAE0B44ED093C6204F30";
+        "B88F542C8BE6FC3E6E11344376EA18B432836E7DC4DF7B36E0B0BEFEF8FA0ACD";
     private const string CompatibleClientStructsFileVersion = "7.51.0.8667";
     private const string CompatibleClientStructsSha256 =
         "C1D168B51BB7624030ED34DCE46B020F8136ECDAA6E30E3A18015C36CBE92E67";

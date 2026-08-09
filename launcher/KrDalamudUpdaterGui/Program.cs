@@ -1368,7 +1368,7 @@ internal sealed class DalamudAssetEntry
 internal sealed class UpdaterSettings
 {
     public string ProfileRoot { get; set; } = "%APPDATA%\\XIVLauncherKR";
-    public string HookVersion { get; set; } = "15.0.3.0";
+    public string HookVersion { get; set; } = "15.0.3.1";
     public bool AutoStart { get; set; } = true;
     public bool AutoApply { get; set; } = true;
     public bool DisablePlugins { get; set; }
