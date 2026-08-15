@@ -13,8 +13,8 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("KR Dalamud Updater Bootstrap")]
 [assembly: AssemblyDescription("Downloads, verifies, and starts the KR Dalamud Updater")]
-[assembly: AssemblyVersion("0.4.9.0")]
-[assembly: AssemblyFileVersion("0.4.9.0")]
+[assembly: AssemblyVersion("0.4.11.0")]
+[assembly: AssemblyFileVersion("0.4.11.0")]
 
 namespace KrDalamudUpdaterBootstrap
 {
@@ -25,7 +25,7 @@ namespace KrDalamudUpdaterBootstrap
         private const string PortableConfigFileName = "DalamudUpdaterConfig.json";
         private const string ReleaseConfigFileName = "UpdaterReleaseConfig.json";
         private const string SharedSettingsEnvironmentName = "KR_DALAMUD_SETTINGS_PATH";
-        private const string BootstrapVersion = "0.4.9";
+        private const string BootstrapVersion = "0.4.11";
         private const string DesktopRuntimeDownloadUrl = "https://dotnet.microsoft.com/download/dotnet/10.0";
         private const long MaximumAssetBytes = 500L * 1024L * 1024L;
 

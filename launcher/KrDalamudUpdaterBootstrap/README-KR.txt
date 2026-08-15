@@ -1,8 +1,8 @@
-KR Dalamud Updater 0.4.9
+KR Dalamud Updater 0.4.11
 
 지원 버전
-- Dalamud Stable 15.0.3.0
-- 한국 서버 게임 2026.07.16.0001.0000 (7.55)
+- Dalamud Stable 15.0.3.2
+- 한국 서버 게임 2026.08.05.0000.0000 (7.55)
 
 필수 설치
 - Microsoft .NET 10 Desktop Runtime x64

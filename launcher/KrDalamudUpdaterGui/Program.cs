@@ -666,12 +666,13 @@ internal sealed class UpdaterForm : Form
             }
 
             var profileRoot = ExpandPath(settings.ProfileRoot);
-            if (!DalamudKrCompatibilityPatch.SupportsGameVersion(release.SupportedGameVer))
+            if (!DalamudKrCompatibilityPatch.SupportsOfficialGameVersion(release.SupportedGameVer))
             {
                 SetStatus("지원하지 않는 게임 버전");
                 MessageBox.Show(
                     $"이 업데이터가 아직 검증하지 않은 게임 버전입니다.\n\n" +
-                    $"지원: {DalamudKrCompatibilityPatch.SupportedGameVersion}\n" +
+                    $"공식 지원: {DalamudKrCompatibilityPatch.OfficialSupportedGameVersion}\n" +
+                    $"한섭 대상: {DalamudKrCompatibilityPatch.SupportedGameVersion}\n" +
                     $"공식: {release.SupportedGameVer}\n\n업데이터 새 버전이 나올 때까지 설치하지 않습니다.",
                     "달라무드 업데이터",
                     MessageBoxButtons.OK,
@@ -829,6 +830,7 @@ internal sealed class UpdaterForm : Form
             VerifyHookPackage(extractedPath);
             File.WriteAllText(Path.Combine(extractedPath, "version.json"), releaseJson);
             DalamudKrCompatibilityPatch.Apply(extractedPath);
+            MigrateCompatibleSignatureCache(profileRoot, extractedPath);
             VerifyHookPackage(extractedPath);
 
             var hooksRoot = Path.Combine(profileRoot, "addon", "Hooks");
@@ -841,6 +843,59 @@ internal sealed class UpdaterForm : Form
         finally
         {
             TryDeleteDirectory(tempRoot);
+        }
+    }
+
+    private static void MigrateCompatibleSignatureCache(string profileRoot, string targetHookRoot)
+    {
+        var hooksRoot = Path.Combine(profileRoot, "addon", "Hooks");
+        if (!Directory.Exists(hooksRoot))
+        {
+            return;
+        }
+
+        foreach (var sourceHookRoot in Directory.GetDirectories(hooksRoot)
+                     .OrderByDescending(Directory.GetLastWriteTimeUtc))
+        {
+            var sourceCacheRoot = Path.Combine(sourceHookRoot, "cachedSigs");
+            var sourceCachePath = Path.Combine(sourceCacheRoot, "cs.json");
+            if (!File.Exists(sourceCachePath) || !HasSupportedSignatureCacheVersion(sourceCachePath))
+            {
+                continue;
+            }
+
+            var targetCacheRoot = Path.Combine(targetHookRoot, "cachedSigs");
+            Directory.CreateDirectory(targetCacheRoot);
+            foreach (var sourcePath in Directory.GetFiles(sourceCacheRoot, "*.json", SearchOption.TopDirectoryOnly))
+            {
+                if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+                {
+                    continue;
+                }
+
+                File.Copy(
+                    sourcePath,
+                    Path.Combine(targetCacheRoot, Path.GetFileName(sourcePath)),
+                    overwrite: true);
+            }
+
+            return;
+        }
+    }
+
+    private static bool HasSupportedSignatureCacheVersion(string cachePath)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(File.ReadAllText(cachePath));
+            var version = document.RootElement.EnumerateObject()
+                .FirstOrDefault(property => property.Name.Equals("Version", StringComparison.OrdinalIgnoreCase))
+                .Value.GetString();
+            return DalamudKrCompatibilityPatch.SupportsGameVersion(version);
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -1368,7 +1423,7 @@ internal sealed class DalamudAssetEntry
 internal sealed class UpdaterSettings
 {
     public string ProfileRoot { get; set; } = "%APPDATA%\\XIVLauncherKR";
-    public string HookVersion { get; set; } = "15.0.3.1";
+    public string HookVersion { get; set; } = "15.0.3.2";
     public bool AutoStart { get; set; } = true;
     public bool AutoApply { get; set; } = true;
     public bool DisablePlugins { get; set; }

@@ -1,6 +1,6 @@
 {
   "ProfileRoot": "%APPDATA%\\XIVLauncherKR",
-  "HookVersion": "15.0.3.1",
+  "HookVersion": "15.0.3.2",
   "AutoStart": true,
   "AutoApply": true,
   "DisablePlugins": false,

@@ -1,18 +1,20 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Mono.Cecil;
 
 namespace KrDalamudUpdaterGui;
 
 internal static class DalamudKrCompatibilityPatch
 {
+    public const string OfficialSupportedGameVersion = "2026.08.11.0000.0000";
     public const string SupportedGameVersion = "2026.08.05.0000.0000";
 
     private const string ClientStructsFileName = "FFXIVClientStructs.dll";
-    private const string OfficialClientStructsFileVersion = "7.51.0.8798";
+    private const string OfficialClientStructsFileVersion = "7.55.1.8875";
     private const string OfficialClientStructsSha256 =
-        "B88F542C8BE6FC3E6E11344376EA18B432836E7DC4DF7B36E0B0BEFEF8FA0ACD";
+        "913FA3ED501BE3054A649607DBB7D52EC1269C500ECFE2637138EE03058A8A43";
     private const string CompatibleClientStructsFileVersion = "7.51.0.8667";
     private const string CompatibleClientStructsSha256 =
         "C1D168B51BB7624030ED34DCE46B020F8136ECDAA6E30E3A18015C36CBE92E67";
@@ -22,9 +24,13 @@ internal static class DalamudKrCompatibilityPatch
     public static bool SupportsGameVersion(string? gameVersion)
         => string.Equals(gameVersion, SupportedGameVersion, StringComparison.OrdinalIgnoreCase);
 
+    public static bool SupportsOfficialGameVersion(string? gameVersion)
+        => string.Equals(gameVersion, OfficialSupportedGameVersion, StringComparison.OrdinalIgnoreCase);
+
     public static void Apply(string hookRoot)
     {
         hookRoot = Path.GetFullPath(hookRoot);
+        NormalizeSupportedGameVersion(hookRoot);
         RequireSupportedGameVersion(hookRoot);
         InstallCompatibleClientStructs(hookRoot);
         VerifyCoreCompatibility(hookRoot);
@@ -222,6 +228,40 @@ internal static class DalamudKrCompatibilityPatch
         }
     }
 
+    private static void NormalizeSupportedGameVersion(string hookRoot)
+    {
+        var versionPath = Path.Combine(hookRoot, "version.json");
+        if (!File.Exists(versionPath))
+        {
+            throw new FileNotFoundException(
+                "version.json을 찾지 못해 공식 지원 게임 버전을 확인할 수 없습니다.",
+                versionPath);
+        }
+
+        var root = JsonNode.Parse(File.ReadAllText(versionPath)) as JsonObject
+            ?? throw new InvalidDataException("version.json의 형식이 올바르지 않습니다.");
+        var supportedProperty = root.FirstOrDefault(property =>
+            property.Key.Equals("supportedGameVer", StringComparison.OrdinalIgnoreCase));
+        var supportedVersion = supportedProperty.Value?.GetValue<string>();
+        if (SupportsGameVersion(supportedVersion))
+        {
+            return;
+        }
+
+        if (!SupportsOfficialGameVersion(supportedVersion))
+        {
+            throw new InvalidDataException(
+                $"검증되지 않은 공식 게임 버전입니다.\n" +
+                $"공식 지원: {OfficialSupportedGameVersion}\n" +
+                $"대상: {supportedVersion ?? "확인 불가"}");
+        }
+
+        root[supportedProperty.Key] = SupportedGameVersion;
+        File.WriteAllText(
+            versionPath,
+            root.ToJsonString(new JsonSerializerOptions { WriteIndented = false }));
+    }
+
     private static string ComputeSha256(string path)
     {
         using var stream = File.OpenRead(path);
@@ -248,8 +288,9 @@ internal static class DalamudKrCompatibilityPatch
         var marker = new
         {
             Patch = "Dalamud KR Stable Compatibility",
-            Version = 3,
+            Version = 4,
             AppliedAtUtc = DateTimeOffset.UtcNow,
+            OfficialSupportedGameVersion,
             SupportedGameVersion,
             OfficialClientStructsFileVersion,
             OfficialClientStructsSha256,
