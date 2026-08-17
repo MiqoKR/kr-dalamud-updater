@@ -23,6 +23,10 @@
 - GitHub Release 기반 업데이트 부트스트랩
 - SHA-256 검증과 ZIP 경로 이탈 방지
 - 실패 시 마지막 정상 버전/내장 버전 fallback
+- 빈 `%APPDATA%\XIVLauncherKR` 프로필의 최소 초기화
+- 기존 프로필의 설정·플러그인·커스텀 저장소 보존
+- Hook/Assets 스테이징 검증, 실패 시 자동 원복, 마지막 업데이트 복구
+- 시스템 .NET 10을 사용한 Dalamud Injector 실행
 - 태그 기반 GitHub Actions 자동 Release
 
 GitHub를 처음 설정하는 절차는 [docs/GITHUB_SETUP_KR.md](docs/GITHUB_SETUP_KR.md)를 참고하세요.

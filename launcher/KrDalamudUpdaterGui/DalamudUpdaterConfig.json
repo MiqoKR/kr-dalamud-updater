@@ -5,5 +5,9 @@
   "AutoApply": true,
   "DisablePlugins": false,
   "DisableCustomRepoPlugins": false,
-  "DelaySeconds": 1
+  "DelaySeconds": 1,
+  "InitializeEmptyProfile": true,
+  "UseSystemDotnet": true,
+  "RequireIsolatedProfile": false,
+  "DistributionLabel": ""
 }
