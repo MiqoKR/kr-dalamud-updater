@@ -13,6 +13,34 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        if (args.Length == 2 && args[0].Equals("--initialize-first-install-profile", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var settings = new UpdaterSettings
+                {
+                    ProfileRoot = args[1],
+                    InitializeEmptyProfile = true,
+                    UseSystemDotnet = true,
+                    RequireIsolatedProfile = true,
+                    DistributionLabel = "FIRST INSTALL TEST",
+                };
+                var result = FirstInstallProfile.Initialize(settings);
+                var dotnetPath = DotnetRuntimeResolver.ResolveDotnetPath(settings);
+                var runtimeVersion = DotnetRuntimeResolver.GetHighestRuntimeVersion(dotnetPath, "Microsoft.NETCore.App");
+                Console.WriteLine($"Profile: {result.ProfileRoot}");
+                Console.WriteLine($"State: {result.CurrentState}");
+                Console.WriteLine($"System dotnet: {dotnetPath}");
+                Console.WriteLine($"Microsoft.NETCore.App: {runtimeVersion ?? "not installed"}");
+                return runtimeVersion is not null && Version.TryParse(runtimeVersion, out var version) && version.Major == 10 ? 0 : 1;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                return 1;
+            }
+        }
+
         if (args.Length == 2 && args[0].Equals("--patch-hook", StringComparison.OrdinalIgnoreCase))
         {
             try
@@ -137,6 +165,7 @@ internal sealed class UpdaterForm : Form
     private readonly Icon trayIcon;
     private readonly Label dalamudVersionLabel = new();
     private readonly Button checkUpdateButton = new();
+    private readonly LinkLabel rollbackLink = new();
     private readonly ComboBox hookCombo = new();
     private readonly CheckBox autoStartCheck = new();
     private readonly CheckBox autoApplyCheck = new();
@@ -158,6 +187,7 @@ internal sealed class UpdaterForm : Form
     {
         settings = UpdaterSettings.Load();
         ApplyArgs(args);
+        FirstInstallProfile.Initialize(settings);
         ResolveInstalledHookVersion();
 
         trayIcon = LoadApplicationIcon();
@@ -211,7 +241,10 @@ internal sealed class UpdaterForm : Form
         var borderColor = Color.FromArgb(218, 222, 228);
         var updaterVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "확인 불가";
 
-        Text = "KR Dalamud Updater";
+        var distributionSuffix = string.IsNullOrWhiteSpace(settings.DistributionLabel)
+            ? ""
+            : $" - {settings.DistributionLabel}";
+        Text = "KR Dalamud Updater" + distributionSuffix;
         ClientSize = new Size(460, 590);
         MinimumSize = new Size(476, 629);
         FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -230,7 +263,9 @@ internal sealed class UpdaterForm : Form
         };
         var titleLabel = new Label
         {
-            Text = "KR Dalamud Updater",
+            Text = string.IsNullOrWhiteSpace(settings.DistributionLabel)
+                ? "KR Dalamud Updater"
+                : "KR Dalamud Updater TEST",
             ForeColor = Color.White,
             Font = new Font("Segoe UI Semibold", 16F),
             Location = new Point(20, 14),
@@ -238,7 +273,9 @@ internal sealed class UpdaterForm : Form
         };
         var subtitleLabel = new Label
         {
-            Text = "한국 서버용 Dalamud 실행 및 호환성 관리",
+            Text = string.IsNullOrWhiteSpace(settings.DistributionLabel)
+                ? "한국 서버용 Dalamud 실행 및 호환성 관리"
+                : $"격리 프로필 · {settings.DistributionLabel}",
             ForeColor = Color.FromArgb(193, 199, 207),
             Font = new Font("Segoe UI", 9F),
             Location = new Point(22, 51),
@@ -317,9 +354,17 @@ internal sealed class UpdaterForm : Form
             Text = "공식 Stable 패키지 · KR 호환성 검증",
             ForeColor = secondaryTextColor,
             Location = new Point(16, 101),
-            Size = new Size(388, 18),
+            Size = new Size(230, 18),
         };
         versionCard.Controls.Add(versionHintLabel);
+        rollbackLink.SetBounds(250, 101, 154, 18);
+        rollbackLink.Text = "마지막 업데이트 복구";
+        rollbackLink.TextAlign = ContentAlignment.MiddleRight;
+        rollbackLink.LinkColor = secondaryTextColor;
+        rollbackLink.ActiveLinkColor = accentColor;
+        rollbackLink.LinkBehavior = LinkBehavior.HoverUnderline;
+        rollbackLink.LinkClicked += (_, _) => RollbackLastUpdate();
+        versionCard.Controls.Add(rollbackLink);
         Controls.Add(versionCard);
 
         var settingsCard = new Panel
@@ -494,6 +539,7 @@ internal sealed class UpdaterForm : Form
         menu.Items.Add("열기", null, (_, _) => ShowFromTray());
         menu.Items.Add("달라무드 적용", null, async (_, _) => await ApplyDalamudAsync(manual: true, cleanOverride: null));
         menu.Items.Add("클린 적용", null, async (_, _) => await ApplyDalamudAsync(manual: true, cleanOverride: true));
+        menu.Items.Add("마지막 업데이트 복구", null, (_, _) => RollbackLastUpdate());
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("종료", null, (_, _) =>
         {
@@ -680,12 +726,15 @@ internal sealed class UpdaterForm : Form
                 return;
             }
 
-            var localRuntimeVersion = ReadTrimmed(Path.Combine(profileRoot, "runtime", "version"));
+            var dotnetPath = DotnetRuntimeResolver.ResolveDotnetPath(settings);
+            var localRuntimeVersion = settings.UseSystemDotnet
+                ? DotnetRuntimeResolver.GetHighestRuntimeVersion(dotnetPath, "Microsoft.NETCore.App")
+                : ReadTrimmed(Path.Combine(profileRoot, "runtime", "version"));
             if (!IsCompatibleRuntimeVersion(localRuntimeVersion, release.RuntimeVersion))
             {
                 SetStatus("런타임 업데이트 필요");
                 MessageBox.Show(
-                    $"Dalamud 런타임 업데이트가 필요합니다.\n\n현재: {localRuntimeVersion ?? "없음"}\n공식: {release.RuntimeVersion}\n\n런타임은 별도 검증 후 갱신해야 하므로 자동 업데이트를 중단합니다.",
+                    $"Dalamud 런타임 업데이트가 필요합니다.\n\n현재: {localRuntimeVersion ?? "없음"}\n공식: {release.RuntimeVersion}\n실행 경로: {dotnetPath}\n\n.NET 10 Desktop Runtime x64를 설치하거나 업데이트하세요.",
                     "달라무드 업데이터",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -717,19 +766,43 @@ internal sealed class UpdaterForm : Form
                 return;
             }
 
-            if (!hookInstalled)
+            var previousHookVersion = settings.HookVersion;
+            var previousAssetVersion = ReadTrimmed(Path.Combine(profileRoot, "dalamudAssets", "asset.ver")) ?? "";
+            var rollbackRecordPath = UpdateRollbackRecord.GetPath(profileRoot);
+            var previousRollbackRecord = File.Exists(rollbackRecordPath)
+                ? File.ReadAllText(rollbackRecordPath)
+                : null;
+            new UpdateRollbackRecord
             {
-                SetStatus($"Dalamud {release.AssemblyVersion} 다운로드 중...");
-                await InstallHookAsync(profileRoot, release, releaseJson);
+                CreatedAtUtc = DateTimeOffset.UtcNow,
+                PreviousHookVersion = previousHookVersion,
+                PreviousAssetVersion = previousAssetVersion,
+                InstalledHookVersion = release.AssemblyVersion,
+                InstalledAssetVersion = assets.Version.ToString(),
+            }.Save(profileRoot);
+
+            try
+            {
+                if (!hookInstalled)
+                {
+                    SetStatus($"Dalamud {release.AssemblyVersion} 다운로드 중...");
+                    await InstallHookAsync(profileRoot, release, releaseJson);
+                }
+
+                if (!assetsInstalled)
+                {
+                    SetStatus($"Assets {assets.Version} 다운로드 중...");
+                    await InstallAssetsAsync(profileRoot, assets);
+                }
+
+                SelectHookVersion(release.AssemblyVersion);
+            }
+            catch
+            {
+                RestoreRollbackRecord(rollbackRecordPath, previousRollbackRecord);
+                throw;
             }
 
-            if (!assetsInstalled)
-            {
-                SetStatus($"Assets {assets.Version} 다운로드 중...");
-                await InstallAssetsAsync(profileRoot, assets);
-            }
-
-            SelectHookVersion(release.AssemblyVersion);
             SetStatus($"업데이트 완료 {release.AssemblyVersion}");
             MessageBox.Show(
                 $"업데이트가 완료되었습니다.\n\nDalamud {release.AssemblyVersion}\nAssets {assets.Version}\n\n기존 Dalamud 버전은 복구용으로 유지했습니다.",
@@ -812,10 +885,13 @@ internal sealed class UpdaterForm : Form
     private static bool IsAssetInstalled(string profileRoot, int version)
     {
         var localVersion = ReadTrimmed(Path.Combine(profileRoot, "dalamudAssets", "asset.ver"));
-        var root = Path.Combine(profileRoot, "dalamudAssets", version.ToString());
-        return localVersion == version.ToString() &&
-               Directory.Exists(root) &&
-               File.Exists(Path.Combine(root, "UIRes", "logo.png"));
+        return localVersion == version.ToString() && IsAssetPackagePresent(profileRoot, version.ToString());
+    }
+
+    private static bool IsAssetPackagePresent(string profileRoot, string version)
+    {
+        var root = Path.Combine(profileRoot, "dalamudAssets", version);
+        return Directory.Exists(root) && File.Exists(Path.Combine(root, "UIRes", "logo.png"));
     }
 
     private async Task InstallHookAsync(string profileRoot, DalamudReleaseInfo release, string releaseJson)
@@ -833,12 +909,19 @@ internal sealed class UpdaterForm : Form
             MigrateCompatibleSignatureCache(profileRoot, extractedPath);
             VerifyHookPackage(extractedPath);
 
-            var hooksRoot = Path.Combine(profileRoot, "addon", "Hooks");
-            Directory.CreateDirectory(hooksRoot);
-            var target = Path.Combine(hooksRoot, release.AssemblyVersion);
-            BackupExistingDirectory(profileRoot, target, "Hooks", release.AssemblyVersion);
-            Directory.Move(extractedPath, target);
-            VerifyHookPackage(target);
+            var target = Path.Combine(profileRoot, "addon", "Hooks", release.AssemblyVersion);
+            using var replacement = DirectoryReplacement.Activate(
+                profileRoot,
+                extractedPath,
+                target,
+                "Hooks",
+                release.AssemblyVersion,
+                path =>
+                {
+                    DalamudKrCompatibilityPatch.Verify(path);
+                    VerifyHookPackage(path);
+                });
+            replacement.Commit();
         }
         finally
         {
@@ -916,12 +999,19 @@ internal sealed class UpdaterForm : Form
             VerifyAssetPackage(extractedPath, assets);
 
             var assetsRoot = Path.Combine(profileRoot, "dalamudAssets");
-            Directory.CreateDirectory(assetsRoot);
             var target = Path.Combine(assetsRoot, assets.Version.ToString());
-            BackupExistingDirectory(profileRoot, target, "Assets", assets.Version.ToString());
-            Directory.Move(extractedPath, target);
-            VerifyAssetPackage(target, assets);
-            File.WriteAllText(Path.Combine(assetsRoot, "asset.ver"), assets.Version.ToString());
+            using var replacement = DirectoryReplacement.Activate(
+                profileRoot,
+                extractedPath,
+                target,
+                "Assets",
+                assets.Version.ToString(),
+                path => VerifyAssetPackage(path, assets));
+            AtomicFile.WriteAllText(
+                Path.Combine(assetsRoot, "asset.ver"),
+                assets.Version.ToString(),
+                Path.Combine(profileRoot, "kr-dalamud-backups", "asset.ver.bak"));
+            replacement.Commit();
         }
         finally
         {
@@ -1005,19 +1095,6 @@ internal sealed class UpdaterForm : Form
         return root;
     }
 
-    private static void BackupExistingDirectory(string profileRoot, string target, string kind, string version)
-    {
-        if (!Directory.Exists(target))
-        {
-            return;
-        }
-
-        var backupRoot = Path.Combine(profileRoot, "kr-dalamud-backups", kind);
-        Directory.CreateDirectory(backupRoot);
-        var backup = Path.Combine(backupRoot, $"{version}-{DateTime.Now:yyyyMMdd-HHmmss}");
-        Directory.Move(target, backup);
-    }
-
     private static void TryDeleteDirectory(string path)
     {
         try
@@ -1030,6 +1107,101 @@ internal sealed class UpdaterForm : Form
         catch
         {
             // Temporary files can be cleaned up on the next system cleanup.
+        }
+    }
+
+    private static void RestoreRollbackRecord(string path, string? previousContents)
+    {
+        if (previousContents is not null)
+        {
+            AtomicFile.WriteAllText(path, previousContents);
+            return;
+        }
+
+        try
+        {
+            File.Delete(path);
+        }
+        catch
+        {
+            // Rollback metadata cleanup must not hide the original update error.
+        }
+    }
+
+    private void RollbackLastUpdate()
+    {
+        SaveSettingsFromUi();
+        if (FindTarget() is not null)
+        {
+            SetStatus("게임 종료 필요");
+            MessageBox.Show("게임을 완전히 종료한 뒤 복구해 주세요.", "달라무드 업데이터", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var profileRoot = ExpandPath(settings.ProfileRoot);
+        var record = UpdateRollbackRecord.Load(profileRoot);
+        if (record is null)
+        {
+            MessageBox.Show("복구할 성공 업데이트 기록이 없습니다.", "달라무드 업데이터", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(record.PreviousHookVersion) ||
+            !IsHookInstalled(profileRoot, record.PreviousHookVersion) ||
+            string.IsNullOrWhiteSpace(record.PreviousAssetVersion) ||
+            !IsAssetPackagePresent(profileRoot, record.PreviousAssetVersion))
+        {
+            MessageBox.Show(
+                "이전 Hook 또는 Assets가 없어 자동 복구할 수 없습니다.\n\n최초 설치 직후에는 이전 상태가 없을 수 있습니다.",
+                "달라무드 업데이터",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return;
+        }
+
+        var answer = MessageBox.Show(
+            $"마지막 업데이트 이전 상태로 전환하시겠습니까?\n\nDalamud: {settings.HookVersion} -> {record.PreviousHookVersion}\nAssets: {ReadTrimmed(Path.Combine(profileRoot, "dalamudAssets", "asset.ver")) ?? "없음"} -> {record.PreviousAssetVersion}\n\n설정과 플러그인은 변경하지 않습니다.",
+            "마지막 업데이트 복구",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question);
+        if (answer != DialogResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            var currentAssetVersion = ReadTrimmed(Path.Combine(profileRoot, "dalamudAssets", "asset.ver")) ?? "";
+            AtomicFile.WriteAllText(
+                Path.Combine(profileRoot, "dalamudAssets", "asset.ver"),
+                record.PreviousAssetVersion,
+                Path.Combine(profileRoot, "kr-dalamud-backups", "asset.ver.before-rollback.bak"));
+            try
+            {
+                SelectHookVersion(record.PreviousHookVersion);
+            }
+            catch
+            {
+                if (!string.IsNullOrWhiteSpace(currentAssetVersion))
+                {
+                    AtomicFile.WriteAllText(
+                        Path.Combine(profileRoot, "dalamudAssets", "asset.ver"),
+                        currentAssetVersion);
+                }
+
+                throw;
+            }
+            SetStatus($"복구 완료 {record.PreviousHookVersion}");
+            MessageBox.Show(
+                $"이전 상태로 전환했습니다.\n\nDalamud {record.PreviousHookVersion}\nAssets {record.PreviousAssetVersion}",
+                "달라무드 업데이터",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("복구 실패");
+            MessageBox.Show(ex.Message, "달라무드 업데이터", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -1429,6 +1601,10 @@ internal sealed class UpdaterSettings
     public bool DisablePlugins { get; set; }
     public bool DisableCustomRepoPlugins { get; set; }
     public int DelaySeconds { get; set; } = 1;
+    public bool InitializeEmptyProfile { get; set; } = true;
+    public bool UseSystemDotnet { get; set; } = true;
+    public bool RequireIsolatedProfile { get; set; }
+    public string DistributionLabel { get; set; } = "";
 
     private static string SettingsPath
     {
@@ -1478,7 +1654,10 @@ internal sealed class UpdaterSettings
 
     public void Save()
     {
-        File.WriteAllText(SettingsPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+        AtomicFile.WriteAllText(
+            SettingsPath,
+            JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }),
+            SettingsPath + ".bak");
     }
 }
 
@@ -1517,7 +1696,7 @@ internal sealed class DalamudLayout
         {
             ProfileRoot = profileRoot,
             HookRoot = hookRoot,
-            DotnetPath = Path.Combine(profileRoot, "runtime", "dotnet.exe"),
+            DotnetPath = DotnetRuntimeResolver.ResolveDotnetPath(settings),
             InjectorDllPath = Path.Combine(hookRoot, "Dalamud.Injector.dll"),
             ConfigPath = Path.Combine(profileRoot, "dalamudConfig.json"),
             PluginRoot = Path.Combine(profileRoot, "installedPlugins"),

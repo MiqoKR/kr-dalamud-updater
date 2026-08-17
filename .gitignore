@@ -26,6 +26,11 @@ launcher/KrDalamudUpdaterGui/*
 !launcher/KrDalamudUpdaterGui/Compatibility/**/
 !launcher/KrDalamudUpdaterGui/Compatibility/**/*.gz
 
+!launcher/KrDalamudUpdaterSafetyTests/
+launcher/KrDalamudUpdaterSafetyTests/*
+!launcher/KrDalamudUpdaterSafetyTests/*.cs
+!launcher/KrDalamudUpdaterSafetyTests/*.csproj
+
 !launcher/KrDalamudUpdaterBootstrap/
 launcher/KrDalamudUpdaterBootstrap/*
 !launcher/KrDalamudUpdaterBootstrap/Program.cs
@@ -37,6 +42,7 @@ launcher/KrDalamudUpdaterBootstrap/*
 tools/*
 !tools/Build-GitHubUpdaterRelease.ps1
 !tools/Build-KrDalamudPortablePackage.ps1
+!tools/Build-KrDalamudFirstInstallTest.ps1
 
 # Application icon
 !assets/
