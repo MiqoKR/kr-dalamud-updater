@@ -6,7 +6,7 @@ namespace KrDalamudUpdaterGui;
 
 internal static class DalamudKrSignaturePatch
 {
-    private const string ResolverTypeName = "Dalamud.Game.ClientState.ClientStateAddressResolver";
+    private const string ResolverTypeName = "Dalamud.Game.ClientState.Keys.KeyStateAddressResolver";
     private const string ResolverMethodName = "Setup64Bit";
     private const string GlobalSignature = "48 8D 0C 85 ?? ?? ?? ?? 8B 04 31 85 C2 0F 85";
     private const string Korean755Signature = "48 8D 0C 85 ?? ?? ?? ?? 8B 04 39 85 C2 0F 85";
@@ -225,8 +225,8 @@ internal static class DalamudKrSignaturePatch
     {
         var marker = new
         {
-            Patch = "Dalamud KR 7.55 ClientState Signature",
-            Version = 3,
+            Patch = "Dalamud KR 7.56 KeyState Signature",
+            Version = 4,
             AppliedAtUtc = DateTimeOffset.UtcNow,
             ExpectedGameVersion = DalamudKrCompatibilityPatch.SupportedGameVersion,
             Resolver = ResolverTypeName,
@@ -237,7 +237,7 @@ internal static class DalamudKrSignaturePatch
             LoggedInFallback = "AgentLobby.IsLoggedIn || AgentLobby.IsLoggedIntoZone || ClientState.TerritoryType != 0",
         };
         File.WriteAllText(
-            Path.Combine(hookRoot, "Dalamud.KR.755.Signature.Patch.json"),
+            Path.Combine(hookRoot, "Dalamud.KR.756.Signature.Patch.json"),
             JsonSerializer.Serialize(marker, new JsonSerializerOptions { WriteIndented = true }));
     }
 }

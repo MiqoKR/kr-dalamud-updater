@@ -8,18 +8,18 @@ namespace KrDalamudUpdaterGui;
 
 internal static class DalamudKrCompatibilityPatch
 {
-    public const string OfficialSupportedGameVersion = "2026.08.11.0000.0000";
-    public const string SupportedGameVersion = "2026.08.05.0000.0000";
+    public const string OfficialSupportedGameVersion = "2026.09.01.0000.0000";
+    public const string SupportedGameVersion = "2026.09.01.0000.0000";
 
     private const string ClientStructsFileName = "FFXIVClientStructs.dll";
-    private const string OfficialClientStructsFileVersion = "7.55.1.8875";
+    private const string OfficialClientStructsFileVersion = "7.55.1.9032";
     private const string OfficialClientStructsSha256 =
-        "913FA3ED501BE3054A649607DBB7D52EC1269C500ECFE2637138EE03058A8A43";
-    private const string CompatibleClientStructsFileVersion = "7.51.0.8667";
+        "CE753AAEBC9279F833400540B80D2F7500DDED2E4FC886892F35D0C9DF69FA64";
+    private const string CompatibleClientStructsFileVersion = "7.55.1.9032";
     private const string CompatibleClientStructsSha256 =
-        "C1D168B51BB7624030ED34DCE46B020F8136ECDAA6E30E3A18015C36CBE92E67";
+        "FAF7F67E7EA1394F32C70A681D7D412AE92EDD3A4AFDEDBD32C5C4B75B96D3C0";
     private const string CompatibleClientStructsResourceName =
-        "KrDalamudUpdaterGui.Compatibility.FFXIVClientStructs.7.51.0.8667.dll.gz";
+        "KrDalamudUpdaterGui.Compatibility.FFXIVClientStructs.7.55.1.9032.dll.gz";
 
     public static bool SupportsGameVersion(string? gameVersion)
         => string.Equals(gameVersion, SupportedGameVersion, StringComparison.OrdinalIgnoreCase);
@@ -288,7 +288,7 @@ internal static class DalamudKrCompatibilityPatch
         var marker = new
         {
             Patch = "Dalamud KR Stable Compatibility",
-            Version = 4,
+            Version = 5,
             AppliedAtUtc = DateTimeOffset.UtcNow,
             OfficialSupportedGameVersion,
             SupportedGameVersion,
@@ -296,7 +296,7 @@ internal static class DalamudKrCompatibilityPatch
             OfficialClientStructsSha256,
             CompatibleClientStructsFileVersion,
             CompatibleClientStructsSha256,
-            SignaturePatch = "KR 7.55 ClientState",
+            SignaturePatch = "KR 7.56 KeyState",
             LanguagePatch = "KR ClientLanguage",
         };
         File.WriteAllText(
