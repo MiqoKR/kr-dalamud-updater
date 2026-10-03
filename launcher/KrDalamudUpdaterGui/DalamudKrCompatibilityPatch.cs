@@ -12,14 +12,14 @@ internal static class DalamudKrCompatibilityPatch
     public const string SupportedGameVersion = "2026.09.15.0000.0000";
 
     private const string ClientStructsFileName = "FFXIVClientStructs.dll";
-    private const string OfficialClientStructsFileVersion = "7.56.2.9089";
+    private const string OfficialClientStructsFileVersion = "7.56.2.9136";
     private const string OfficialClientStructsSha256 =
-        "2DC5B513647CC9897041D4BCFEB1E2C15EC087E6E0D04570D72F73B7614C39A5";
-    private const string CompatibleClientStructsFileVersion = "7.56.2.9089";
+        "4B6F4ACCF4D1038A6E5339A359F536E9ABB9D4E713A8E34D85C80F8CA3D36B56";
+    private const string CompatibleClientStructsFileVersion = "7.56.2.9136";
     private const string CompatibleClientStructsSha256 =
-        "E8EE688C069D5B95174EC030735A7AB9EBB86A6FB55A6BD9BDD5DA67AF2832A9";
+        "DB706E92C08AB556F246C9248F9BD175CFFF86393445264DF9B5BB14D554942F";
     private const string CompatibleClientStructsResourceName =
-        "KrDalamudUpdaterGui.Compatibility.FFXIVClientStructs.7.56.2.9089.dll.gz";
+        "KrDalamudUpdaterGui.Compatibility.FFXIVClientStructs.7.56.2.9136.dll.gz";
 
     public static bool SupportsGameVersion(string? gameVersion)
         => string.Equals(gameVersion, SupportedGameVersion, StringComparison.OrdinalIgnoreCase);
@@ -288,7 +288,7 @@ internal static class DalamudKrCompatibilityPatch
         var marker = new
         {
             Patch = "Dalamud KR Stable Compatibility",
-            Version = 7,
+            Version = 8,
             AppliedAtUtc = DateTimeOffset.UtcNow,
             OfficialSupportedGameVersion,
             SupportedGameVersion,
