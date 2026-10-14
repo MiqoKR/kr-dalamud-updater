@@ -9,9 +9,9 @@ internal static class DalamudKrSignaturePatch
     private const string ResolverTypeName = "Dalamud.Game.ClientState.Keys.KeyStateAddressResolver";
     private const string ResolverMethodName = "Setup64Bit";
     private const string GlobalSignature = "48 8D 0C 85 ?? ?? ?? ?? 8B 04 31 85 C2 0F 85";
-    private const string Korean755Signature = "48 8D 0C 85 ?? ?? ?? ?? 8B 04 39 85 C2 0F 85";
+    private const string KoreanSignature = "48 8D 0C 85 ?? ?? ?? ?? 8B 04 39 85 C2 0F 85";
     private const string GlobalIndexSignature = "0F B6 94 33 ?? ?? ?? ?? 84 D2";
-    private const string Korean755IndexSignature = "0F B6 B4 3B ?? ?? ?? ?? 40 84 F6";
+    private const string KoreanIndexSignature = "0F B6 B4 3B ?? ?? ?? ?? 40 84 F6";
     private const string ClientStateTypeName = "Dalamud.Game.ClientState.ClientState";
     private const string LoggedInFallbackFieldName = "IsLoggedIntoZone";
 
@@ -42,9 +42,9 @@ internal static class DalamudKrSignaturePatch
 
             var method = RequireResolverMethod(assembly.MainModule);
             var globalLoads = FindSignatureLoads(method, GlobalSignature);
-            var koreanLoads = FindSignatureLoads(method, Korean755Signature);
+            var koreanLoads = FindSignatureLoads(method, KoreanSignature);
             var globalIndexLoads = FindSignatureLoads(method, GlobalIndexSignature);
-            var koreanIndexLoads = FindSignatureLoads(method, Korean755IndexSignature);
+            var koreanIndexLoads = FindSignatureLoads(method, KoreanIndexSignature);
             var keyboardPatched = koreanLoads.Length == 1 && globalLoads.Length == 0;
             var indexPatched = koreanIndexLoads.Length == 1 && globalIndexLoads.Length == 0;
             var loginPatched = HasLoggedInFallback(assembly.MainModule);
@@ -58,24 +58,24 @@ internal static class DalamudKrSignaturePatch
             {
                 throw new InvalidDataException(
                     $"예상하지 못한 키보드 시그니처 구조입니다. " +
-                    $"Global={globalLoads.Length}, Korean755={koreanLoads.Length}");
+                    $"Global={globalLoads.Length}, Korean={koreanLoads.Length}");
             }
 
             if (!indexPatched && (globalIndexLoads.Length != 1 || koreanIndexLoads.Length != 0))
             {
                 throw new InvalidDataException(
                     $"예상하지 못한 키보드 인덱스 시그니처 구조입니다. " +
-                    $"Global={globalIndexLoads.Length}, Korean755={koreanIndexLoads.Length}");
+                    $"Global={globalIndexLoads.Length}, Korean={koreanIndexLoads.Length}");
             }
 
             if (!keyboardPatched)
             {
-                globalLoads[0].Operand = Korean755Signature;
+                globalLoads[0].Operand = KoreanSignature;
             }
 
             if (!indexPatched)
             {
-                globalIndexLoads[0].Operand = Korean755IndexSignature;
+                globalIndexLoads[0].Operand = KoreanIndexSignature;
             }
 
             if (!loginPatched)
@@ -111,9 +111,9 @@ internal static class DalamudKrSignaturePatch
 
         var method = RequireResolverMethod(assembly.MainModule);
         var globalLoads = FindSignatureLoads(method, GlobalSignature);
-        var koreanLoads = FindSignatureLoads(method, Korean755Signature);
+        var koreanLoads = FindSignatureLoads(method, KoreanSignature);
         var globalIndexLoads = FindSignatureLoads(method, GlobalIndexSignature);
-        var koreanIndexLoads = FindSignatureLoads(method, Korean755IndexSignature);
+        var koreanIndexLoads = FindSignatureLoads(method, KoreanIndexSignature);
         if (globalLoads.Length != 0 ||
             koreanLoads.Length != 1 ||
             globalIndexLoads.Length != 0 ||
@@ -121,9 +121,9 @@ internal static class DalamudKrSignaturePatch
             !HasLoggedInFallback(assembly.MainModule))
         {
             throw new InvalidDataException(
-                $"KR 7.55 시그니처 패치 검증에 실패했습니다. " +
-                $"Keyboard(Global={globalLoads.Length}, Korean755={koreanLoads.Length}), " +
-                $"Index(Global={globalIndexLoads.Length}, Korean755={koreanIndexLoads.Length})");
+                $"KR KeyState 시그니처 패치 검증에 실패했습니다. " +
+                $"Keyboard(Global={globalLoads.Length}, Korean={koreanLoads.Length}), " +
+                $"Index(Global={globalIndexLoads.Length}, Korean={koreanIndexLoads.Length})");
         }
     }
 
@@ -225,19 +225,19 @@ internal static class DalamudKrSignaturePatch
     {
         var marker = new
         {
-            Patch = "Dalamud KR 7.56 KeyState Signature",
-            Version = 4,
+            Patch = "Dalamud KR 7.57 KeyState Signature",
+            Version = 5,
             AppliedAtUtc = DateTimeOffset.UtcNow,
             ExpectedGameVersion = DalamudKrCompatibilityPatch.SupportedGameVersion,
             Resolver = ResolverTypeName,
             GlobalSignature,
-            Korean755Signature,
+            KoreanSignature,
             GlobalIndexSignature,
-            Korean755IndexSignature,
+            KoreanIndexSignature,
             LoggedInFallback = "AgentLobby.IsLoggedIn || AgentLobby.IsLoggedIntoZone || ClientState.TerritoryType != 0",
         };
         File.WriteAllText(
-            Path.Combine(hookRoot, "Dalamud.KR.756.Signature.Patch.json"),
+            Path.Combine(hookRoot, "Dalamud.KR.757.Signature.Patch.json"),
             JsonSerializer.Serialize(marker, new JsonSerializerOptions { WriteIndented = true }));
     }
 }
