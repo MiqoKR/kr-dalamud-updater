@@ -43,6 +43,8 @@ tools/*
 !tools/Build-GitHubUpdaterRelease.ps1
 !tools/Build-KrDalamudPortablePackage.ps1
 !tools/Build-KrDalamudFirstInstallTest.ps1
+!tools/Inspect-KrClient.cjs
+!tools/Test-KrHookPackage.ps1
 
 # Application icon
 !assets/

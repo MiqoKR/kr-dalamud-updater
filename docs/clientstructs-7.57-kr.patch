@@ -1,0 +1,271 @@
+diff --git a/FFXIVClientStructs/FFXIV/Client/System/Input/TextService.cs b/FFXIVClientStructs/FFXIV/Client/System/Input/TextService.cs
+index e5372a537..f25da3a87 100644
+--- a/FFXIVClientStructs/FFXIV/Client/System/Input/TextService.cs
++++ b/FFXIVClientStructs/FFXIV/Client/System/Input/TextService.cs
+@@ -2,5 +2,6 @@ namespace FFXIVClientStructs.FFXIV.Client.System.Input;
+ 
+ // Client::System::Input::TextService
+ // ctor "45 33 C9 44 88 41 18"
+-[StructLayout(LayoutKind.Explicit, Size = 0x30)]
++// KR 2026.10.06: constructor and adjacent AtkTextInput at AtkModule+0x72F0.
++[StructLayout(LayoutKind.Explicit, Size = 0x20)]
+ public struct TextService;
+diff --git a/FFXIVClientStructs/FFXIV/Client/UI/RaptureAtkModule.cs b/FFXIVClientStructs/FFXIV/Client/UI/RaptureAtkModule.cs
+index 76c0e9768..be1be4f6a 100644
+--- a/FFXIVClientStructs/FFXIV/Client/UI/RaptureAtkModule.cs
++++ b/FFXIVClientStructs/FFXIV/Client/UI/RaptureAtkModule.cs
+@@ -15,7 +15,7 @@ namespace FFXIVClientStructs.FFXIV.Client.UI;
+ //   Common::Configuration::ConfigBase::ChangeEventInterface
+ [GenerateInterop]
+ [Inherits<AtkModule>, Inherits<ChangeEventInterface>]
+-[StructLayout(LayoutKind.Explicit, Size = 0x2A980)]
++[StructLayout(LayoutKind.Explicit, Size = 0x2A970)]
+ [VirtualTable("48 8D 05 ?? ?? ?? ?? 48 89 8F ?? ?? ?? ?? 48 89 07", 3)]
+ public unsafe partial struct RaptureAtkModule {
+     public static RaptureAtkModule* Instance() {
+@@ -23,64 +23,64 @@ public unsafe partial struct RaptureAtkModule {
+         return uiModule == null ? null : uiModule->GetRaptureAtkModule();
+     }
+ 
+-    [FieldOffset(0x8310)] public GameUIScene UIScene;
+-    [FieldOffset(0x8312)] public GameUIMode UIMode;
++    [FieldOffset(0x8300)] public GameUIScene UIScene;
++    [FieldOffset(0x8302)] public GameUIMode UIMode;
+ 
+-    [FieldOffset(0x83C0)] internal Utf8String Unk8358;
+-    [FieldOffset(0x8428), FixedSizeArray] internal FixedSizeArray6<Utf8String> _unkArray;
+-    [FieldOffset(0x8698)] public Utf8String ItalicOn; // <italic(1)>
+-    [FieldOffset(0x8700)] public Utf8String ItalicOff; // <italic(0)>
+-    [FieldOffset(0x8768)] public Utf8String BoldOn; // <bold(1)>
+-    [FieldOffset(0x87D0)] public Utf8String BoldOff; // <bold(0)>
++    [FieldOffset(0x83B0)] internal Utf8String Unk8358;
++    [FieldOffset(0x8418), FixedSizeArray] internal FixedSizeArray6<Utf8String> _unkArray;
++    [FieldOffset(0x8688)] public Utf8String ItalicOn; // <italic(1)>
++    [FieldOffset(0x86F0)] public Utf8String ItalicOff; // <italic(0)>
++    [FieldOffset(0x8758)] public Utf8String BoldOn; // <bold(1)>
++    [FieldOffset(0x87C0)] public Utf8String BoldOff; // <bold(0)>
+ 
+-    [FieldOffset(0x887F)] public AgentUpdateFlags AgentUpdateFlag; // reset happens in RaptureAtkModule_OnUpdate
+-    [FieldOffset(0x8880), FixedSizeArray] internal FixedSizeArray991<AddonFactoryInfo> _addonFactories;
+-    [FieldOffset(0x12358)] public StdVector<Utf8String> AddonNames;
+-    [FieldOffset(0x12370)] public AddonConfig* AddonConfigPtr;
++    [FieldOffset(0x886F)] public AgentUpdateFlags AgentUpdateFlag; // reset happens in RaptureAtkModule_OnUpdate
++    [FieldOffset(0x8870), FixedSizeArray] internal FixedSizeArray991<AddonFactoryInfo> _addonFactories;
++    [FieldOffset(0x12348)] public StdVector<Utf8String> AddonNames;
++    [FieldOffset(0x12360)] public AddonConfig* AddonConfigPtr;
+ 
+-    [FieldOffset(0x1237A)] public AtkCursor.CursorType CursorType;
++    [FieldOffset(0x1236A)] public AtkCursor.CursorType CursorType;
+ 
+-    // [FieldOffset(0x12380)] public ProhibitModule ProhibitModule;
+-    [FieldOffset(0x12418)] public int AudioClientRpcTagSize;
++    // [FieldOffset(0x12370)] public ProhibitModule ProhibitModule;
++    [FieldOffset(0x12408)] public int AudioClientRpcTagSize;
+ 
+-    [FieldOffset(0x12420)] public char* AudioClientRpcTag;
++    [FieldOffset(0x12410)] public char* AudioClientRpcTag;
+ 
+-    [FieldOffset(0x12428)] public UIModule* UIModulePtr;
+-    [FieldOffset(0x12430)] public RaptureLogModule* RaptureLogModulePtr;
+-    [FieldOffset(0x12438)] public AgentModule AgentModule;
+-    [FieldOffset(0x13450)] public RaptureHotbarModule* RaptureHotbarModulePtr;
++    [FieldOffset(0x12418)] public UIModule* UIModulePtr;
++    [FieldOffset(0x12420)] public RaptureLogModule* RaptureLogModulePtr;
++    [FieldOffset(0x12428)] public AgentModule AgentModule;
++    [FieldOffset(0x13440)] public RaptureHotbarModule* RaptureHotbarModulePtr;
+ 
+-    [FieldOffset(0x13460)] public RaptureAtkUnitManager RaptureAtkUnitManager;
+-    [FieldOffset(0x1D190)] public RaptureAtkColorDataManager RaptureAtkColorDataManager;
++    [FieldOffset(0x13450)] public RaptureAtkUnitManager RaptureAtkUnitManager;
++    [FieldOffset(0x1D180)] public RaptureAtkColorDataManager RaptureAtkColorDataManager;
+ 
+-    [FieldOffset(0x1D410)] public int NameplateInfoCount;
+-    [FieldOffset(0x1D418), FixedSizeArray] internal FixedSizeArray50<NamePlateInfo> _namePlateInfoEntries;
++    [FieldOffset(0x1D400)] public int NameplateInfoCount;
++    [FieldOffset(0x1D408), FixedSizeArray] internal FixedSizeArray50<NamePlateInfo> _namePlateInfoEntries;
+ 
+-    [FieldOffset(0x24890), FixedSizeArray] internal FixedSizeArray18<CrystalCache> _crystalItemCache;
+-    [FieldOffset(0x25340)] public ItemCache* KeyItemCache; // ptr to 120 entries
+-    [FieldOffset(0x25348)] public ItemCache* EquippedItemCache; // ptr to 14 entries
+-    [FieldOffset(0x25350), FixedSizeArray] internal FixedSizeArray160<ItemCache> _inventoryItemCache; // only 140 slots are processed, unused?
+-    [FieldOffset(0x2A850)] public uint InventoryItemCacheSlotCount;
+-    [FieldOffset(0x2A854)] public uint GilCap;
++    [FieldOffset(0x24880), FixedSizeArray] internal FixedSizeArray18<CrystalCache> _crystalItemCache;
++    [FieldOffset(0x25330)] public ItemCache* KeyItemCache; // ptr to 120 entries
++    [FieldOffset(0x25338)] public ItemCache* EquippedItemCache; // ptr to 14 entries
++    [FieldOffset(0x25340), FixedSizeArray] internal FixedSizeArray160<ItemCache> _inventoryItemCache; // only 140 slots are processed, unused?
++    [FieldOffset(0x2A840)] public uint InventoryItemCacheSlotCount;
++    [FieldOffset(0x2A844)] public uint GilCap;
+ 
+-    [FieldOffset(0x2A8B8)] public uint LocalPlayerClassJobId;
+-    [FieldOffset(0x2A8BC)] public uint LocalPlayerLevel;
++    [FieldOffset(0x2A8A8)] public uint LocalPlayerClassJobId;
++    [FieldOffset(0x2A8AC)] public uint LocalPlayerLevel;
+ 
+-    [FieldOffset(0x2A8C5)] public bool QuickGatheringEnabled;
++    [FieldOffset(0x2A8B5)] public bool QuickGatheringEnabled;
+ 
+-    [FieldOffset(0x2A8CB)] public bool QTEActive;
++    [FieldOffset(0x2A8BB)] public bool QTEActive;
+ 
+-    [FieldOffset(0x2A930)] internal ExcelSheet* AddonParamSheet;
+-    [FieldOffset(0x2A938)] public AtkTexture CharaViewDefaultBackgroundTexture; // "ui/common/CharacterBg.tex" (or _hr1 variant)
+-    [FieldOffset(0x2A950)] public CreditMode CreditMode;
+-    [FieldOffset(0x2A954)] public uint LoginSummonCompanionId;
+-    [FieldOffset(0x2A958)] public float LoginSummonCompanionCountdown;
++    [FieldOffset(0x2A920)] internal ExcelSheet* AddonParamSheet;
++    [FieldOffset(0x2A928)] public AtkTexture CharaViewDefaultBackgroundTexture; // "ui/common/CharacterBg.tex" (or _hr1 variant)
++    [FieldOffset(0x2A940)] public CreditMode CreditMode;
++    [FieldOffset(0x2A944)] public uint LoginSummonCompanionId;
++    [FieldOffset(0x2A948)] public float LoginSummonCompanionCountdown;
+     /// <remarks> Only for Region 5 </remarks>
+-    [FieldOffset(0x2A95C)] public float HourTimer;
++    [FieldOffset(0x2A94C)] public float HourTimer;
+     /// <remarks> Only for Region 5 </remarks>
+-    [FieldOffset(0x2A960)] public int HoursPlayed;
++    [FieldOffset(0x2A950)] public int HoursPlayed;
+ 
+-    [FieldOffset(0x2A978)] internal nint ShellCommands; // only 1 function to open links?
++    [FieldOffset(0x2A968)] internal nint ShellCommands; // only 1 function to open links?
+ 
+     [MemberFunction("E8 ?? ?? ?? ?? 49 89 9E ?? ?? ?? ?? 49 89 5E")]
+     public partial bool ChangeUIScene(GameUIScene scene);
+diff --git a/FFXIVClientStructs/FFXIV/Client/UI/UIModule.cs b/FFXIVClientStructs/FFXIV/Client/UI/UIModule.cs
+index 6f8d8491a..9c15bb7ff 100644
+--- a/FFXIVClientStructs/FFXIV/Client/UI/UIModule.cs
++++ b/FFXIVClientStructs/FFXIV/Client/UI/UIModule.cs
+@@ -17,7 +17,7 @@ namespace FFXIVClientStructs.FFXIV.Client.UI;
+ //   Common::Configuration::ConfigBase::ChangeEventInterface
+ [GenerateInterop]
+ [Inherits<UIModuleInterface>, Inherits<AtkModuleEvent>, Inherits<ExcelLanguageEvent>, Inherits<ChangeEventInterface>]
+-[StructLayout(LayoutKind.Explicit, Size = 0xFFBA0)]
++[StructLayout(LayoutKind.Explicit, Size = 0xFFB90)]
+ [VirtualTable("48 8D 05 ?? ?? ?? ?? 4C 89 4C 24 ?? 48 89 01", 3, 250)]
+ public unsafe partial struct UIModule {
+     public static UIModule* Instance() {
+@@ -106,20 +106,20 @@ public unsafe partial struct UIModule {
+ 
+     [FieldOffset(0xBB150)] internal UI3DModule UI3DModule;
+     [FieldOffset(0xD2690)] internal RaptureAtkModule RaptureAtkModule;
+-    [FieldOffset(0xFD010)] internal InfoModule InfoModule;
+-    [FieldOffset(0xFEC88)] internal UIModuleHelpers UIModuleHelpers;
+-    [FieldOffset(0xFECD8)] public Utf8String AddonSheetName;
++    [FieldOffset(0xFD000)] internal InfoModule InfoModule;
++    [FieldOffset(0xFEC78)] internal UIModuleHelpers UIModuleHelpers;
++    [FieldOffset(0xFECC8)] public Utf8String AddonSheetName;
+ 
+-    [FieldOffset(0xFED48)] public Utf8String UIColorSheetName;
++    [FieldOffset(0xFED38)] public Utf8String UIColorSheetName;
+ 
+-    [FieldOffset(0xFEDC0)] public Utf8String CompletionSheetName;
+-    [FieldOffset(0xFEE28)] public Utf8String CompletionOpenIconMacro;
+-    [FieldOffset(0xFEE90)] public Utf8String CompletionCloseIconMacro;
+-    [FieldOffset(0xFEEF8)] public Utf8String NewLineMacro;
+-    [FieldOffset(0xFEF60)] public Utf8String LastTalkName;
+-    [FieldOffset(0xFEFC8)] public Utf8String LastTalkText;
+-    [FieldOffset(0xFF030)] internal UIInputData UIInputData;
+-    [FieldOffset(0xFFA60)] internal UIInputModule UIInputModule;
++    [FieldOffset(0xFEDB0)] public Utf8String CompletionSheetName;
++    [FieldOffset(0xFEE18)] public Utf8String CompletionOpenIconMacro;
++    [FieldOffset(0xFEE80)] public Utf8String CompletionCloseIconMacro;
++    [FieldOffset(0xFEEE8)] public Utf8String NewLineMacro;
++    [FieldOffset(0xFEF50)] public Utf8String LastTalkName;
++    [FieldOffset(0xFEFB8)] public Utf8String LastTalkText;
++    [FieldOffset(0xFF020)] internal UIInputData UIInputData;
++    [FieldOffset(0xFFA50)] internal UIInputModule UIInputModule;
+     // [FieldOffset(0xF7BA8)] public Vf79Struct;
+ 
+     [MemberFunction("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 48 8B F2 48 8B F9 45 84 C9")]
+diff --git a/FFXIVClientStructs/FFXIV/Component/GUI/AtkComponentDropDownList.cs b/FFXIVClientStructs/FFXIV/Component/GUI/AtkComponentDropDownList.cs
+index b7a24a721..9eb4e72c8 100644
+--- a/FFXIVClientStructs/FFXIV/Component/GUI/AtkComponentDropDownList.cs
++++ b/FFXIVClientStructs/FFXIV/Component/GUI/AtkComponentDropDownList.cs
+@@ -8,7 +8,8 @@ namespace FFXIVClientStructs.FFXIV.Component.GUI;
+ [GenerateInterop]
+ [Inherits<AtkComponentBase>]
+ [StructLayout(LayoutKind.Explicit, Size = 0xE0)]
+-[VirtualTable("E8 ?? ?? ?? ?? 4C 8B F0 48 85 C0 0F 84 ?? ?? ?? ?? 49 8B 4D 08", [1, 1514])]
++// KR 2026.10.06: factory RVA 0x66A290, vtable LEA displacement at +1508.
++[VirtualTable("E8 ?? ?? ?? ?? 4C 8B F0 48 85 C0 0F 84 ?? ?? ?? ?? 49 8B 4D 08", [1, 1508])]
+ public unsafe partial struct AtkComponentDropDownList : ICreatable<AtkComponentDropDownList> {
+     [FieldOffset(0xC0)] public AtkComponentCheckBox* Checkbox;
+     [FieldOffset(0xC8)] public AtkComponentList* List;
+diff --git a/FFXIVClientStructs/FFXIV/Component/GUI/AtkModule.cs b/FFXIVClientStructs/FFXIV/Component/GUI/AtkModule.cs
+index 223040b6b..0a5fe802f 100644
+--- a/FFXIVClientStructs/FFXIV/Component/GUI/AtkModule.cs
++++ b/FFXIVClientStructs/FFXIV/Component/GUI/AtkModule.cs
+@@ -13,7 +13,7 @@ namespace FFXIVClientStructs.FFXIV.Component.GUI;
+ //   Client::System::Input::TextServiceInterface::TextServiceEvent
+ [GenerateInterop(isInherited: true)]
+ [Inherits<AtkModuleInterface>, Inherits<AtkExternalInterface>, Inherits<TextServiceEvent>]
+-[StructLayout(LayoutKind.Explicit, Size = 0x82F0)]
++[StructLayout(LayoutKind.Explicit, Size = 0x82E0)]
+ public unsafe partial struct AtkModule {
+     public delegate AtkValue* CallbackHandlerDelegate(AtkModule* thisPtr, AtkValue* returnValue, AtkValue* values, uint valueCount);
+ 
+@@ -38,25 +38,27 @@ public unsafe partial struct AtkModule {
+     [FieldOffset(0x72B8)] public StdMap<uint, AddonCallbackEntry> AddonCallbackMapping; // Key is UnitBase->Id
+     [FieldOffset(0x72C8)] public AtkMessageBoxManager* AtkMessageBoxManager;
+     [FieldOffset(0x72D0)] public TextService TextService;
+-    [FieldOffset(0x7300)] public AtkTextInput TextInput;
+-    [FieldOffset(0x7FF0)] internal Utf8String Unk7FE8;
+-    [FieldOffset(0x8058)] internal Utf8String Unk8050;
+-    [FieldOffset(0x80C0)] internal Utf8String Unk80B8;
+-    [FieldOffset(0x8128)] internal Utf8String Unk8120;
++    // KR 2026.10.06: TextService is 0x20 (ctor RVA 0xD6E40).
++    // AtkModule ctor RVA 0x6A9916 confirms the following subobject addresses.
++    [FieldOffset(0x72F0)] public AtkTextInput TextInput;
++    [FieldOffset(0x7FE0)] internal Utf8String Unk7FE8;
++    [FieldOffset(0x8048)] internal Utf8String Unk8050;
++    [FieldOffset(0x80B0)] internal Utf8String Unk80B8;
++    [FieldOffset(0x8118)] internal Utf8String Unk8120;
+ 
+     // probably an #IFDEF WINDOWS here or something specifically creating a Steam keyboard.
+     // hope they don't add more soft keyboards later!
+-    [FieldOffset(0x8198)] public SteamGamepadSoftKeyboard SoftKeyboardDevice;
++    [FieldOffset(0x8188)] public SteamGamepadSoftKeyboard SoftKeyboardDevice;
+ 
+-    [FieldOffset(0x82B0), FixedSizeArray(isString: true)] internal FixedSizeArray16<byte> _currentUIScene;
+-    [FieldOffset(0x82C0), FixedSizeArray(isString: true)] internal FixedSizeArray16<byte> _loadingUIScene;
++    [FieldOffset(0x82A0), FixedSizeArray(isString: true)] internal FixedSizeArray16<byte> _currentUIScene;
++    [FieldOffset(0x82B0), FixedSizeArray(isString: true)] internal FixedSizeArray16<byte> _loadingUIScene;
+ 
+-    [FieldOffset(0x82D8)] internal ushort ScreenWidth; // maybe UI dimensions?
+-    [FieldOffset(0x82DA)] internal ushort ScreenHeight;
+-    [FieldOffset(0x82DC)] public bool EnableUiDraw;
++    [FieldOffset(0x82C8)] internal ushort ScreenWidth; // maybe UI dimensions?
++    [FieldOffset(0x82CA)] internal ushort ScreenHeight;
++    [FieldOffset(0x82CC)] public bool EnableUiDraw;
+ 
+-    [FieldOffset(0x82E0)] public bool EnableUiInput;
+-    [FieldOffset(0x82E1)] public bool IsHudInitialized;
++    [FieldOffset(0x82D0)] public bool EnableUiInput;
++    [FieldOffset(0x82D1)] public bool IsHudInitialized;
+ 
+     [VirtualFunction(44)]
+     public partial AddonStatus GetAddonStatus(uint addonId);
+diff --git a/FFXIVClientStructs/FFXIV/Component/GUI/AtkResNode.cs b/FFXIVClientStructs/FFXIV/Component/GUI/AtkResNode.cs
+index aa6c9c7c2..cc1bbb57a 100644
+--- a/FFXIVClientStructs/FFXIV/Component/GUI/AtkResNode.cs
++++ b/FFXIVClientStructs/FFXIV/Component/GUI/AtkResNode.cs
+@@ -349,7 +349,7 @@ public unsafe partial struct AtkResNode : ICreatable<AtkResNode> {
+     [MemberFunction("E8 ?? ?? ?? ?? 33 D2 48 8B 8C 24")]
+     public partial void SetPriority(ushort priority);
+ 
+-    [MemberFunction("E8 ?? ?? ?? ?? 3C 01 75 7F")]
++    [MemberFunction("48 85 C9 74 ?? F7 81 AC 00 00 00 00 00 10 00 74 ?? F7 81 B0 00 00 00 00 00 04 00 75 ?? B8 01 00 00 00 C3 32 C0 C3")]
+     public partial bool IsVisible();
+ 
+     [MemberFunction("E8 ?? ?? ?? ?? 48 83 C7 08 48 83 EE 01 75 D5 48 8B 4C 24 ??")]
+diff --git a/FFXIVClientStructs/FFXIVClientStructs.csproj b/FFXIVClientStructs/FFXIVClientStructs.csproj
+index 85075be6a..cc3626cc8 100644
+--- a/FFXIVClientStructs/FFXIVClientStructs.csproj
++++ b/FFXIVClientStructs/FFXIVClientStructs.csproj
+@@ -35,7 +35,7 @@
+ 
+   <Target Name="PopulateInfo" DependsOnTargets="GitVersion" BeforeTargets="GetAssemblyVersion">
+     <PropertyGroup>
+-      <AssemblyVersion>7.57.0.$(GitCommits)</AssemblyVersion>
++      <AssemblyVersion>7.57.0.9378</AssemblyVersion>
+     </PropertyGroup>
+   </Target>
