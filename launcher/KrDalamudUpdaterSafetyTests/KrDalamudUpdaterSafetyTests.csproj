@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\KrDalamudUpdaterGui\ProfileSafety.cs" Link="ProfileSafety.cs" />
+    <Compile Include="..\KrDalamudUpdaterGui\RuntimeVersionPolicy.cs" Link="RuntimeVersionPolicy.cs" />
   </ItemGroup>
 </Project>

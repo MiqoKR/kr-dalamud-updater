@@ -730,7 +730,7 @@ internal sealed class UpdaterForm : Form
             var localRuntimeVersion = settings.UseSystemDotnet
                 ? DotnetRuntimeResolver.GetHighestRuntimeVersion(dotnetPath, "Microsoft.NETCore.App")
                 : ReadTrimmed(Path.Combine(profileRoot, "runtime", "version"));
-            if (!IsCompatibleRuntimeVersion(localRuntimeVersion, release.RuntimeVersion))
+            if (!RuntimeVersionPolicy.IsCompatible(localRuntimeVersion, release.RuntimeVersion))
             {
                 SetStatus("런타임 업데이트 필요");
                 MessageBox.Show(
@@ -854,17 +854,6 @@ internal sealed class UpdaterForm : Form
         {
             return null;
         }
-    }
-
-    internal static bool IsCompatibleRuntimeVersion(string? localVersion, string? requiredVersion)
-    {
-        if (!Version.TryParse(localVersion, out var local) ||
-            !Version.TryParse(requiredVersion, out var required))
-        {
-            return false;
-        }
-
-        return local.Major == required.Major && local >= required;
     }
 
     private static bool IsHookInstalled(string profileRoot, string version)
@@ -1595,7 +1584,7 @@ internal sealed class DalamudAssetEntry
 internal sealed class UpdaterSettings
 {
     public string ProfileRoot { get; set; } = "%APPDATA%\\XIVLauncherKR";
-    public string HookVersion { get; set; } = "15.0.3.7";
+    public string HookVersion { get; set; } = "15.0.4.0";
     public bool AutoStart { get; set; } = true;
     public bool AutoApply { get; set; } = true;
     public bool DisablePlugins { get; set; }

@@ -11,6 +11,7 @@ try
     TestReplacementRollbackOnPostActivationFailure();
     TestCommittedReplacementPreservesPlugins();
     TestAtomicFileBackup();
+    TestRuntimeCompatibility();
     Console.WriteLine("PASS: all profile safety scenarios");
     return 0;
 }
@@ -145,6 +146,14 @@ void TestAtomicFileBackup()
     AtomicFile.WriteAllText(path, "new", backup);
     Assert(File.ReadAllText(path) == "new", "atomic destination");
     Assert(File.ReadAllText(backup) == "old", "atomic backup");
+}
+
+void TestRuntimeCompatibility()
+{
+    Assert(!RuntimeVersionPolicy.IsCompatible("10.0.10", "10.0.14"), "older runtime rejected");
+    Assert(RuntimeVersionPolicy.IsCompatible("10.0.14", "10.0.14"), "required runtime accepted");
+    Assert(RuntimeVersionPolicy.IsCompatible("10.0.15", "10.0.14"), "newer patch runtime accepted");
+    Assert(!RuntimeVersionPolicy.IsCompatible("11.0.0", "10.0.14"), "different major rejected");
 }
 
 static void Assert(bool condition, string scenario)
